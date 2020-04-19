@@ -3,7 +3,7 @@
  *
  * Created: 09.02.2016 20:24:18
  *  Author: Christof
- */ 
+ */
 
 #include "Klingelzugang.h"
 
@@ -20,6 +20,6 @@ SIGNAL(PORTD_INT0_vect)
 	_delay_ms(100);
 	if( (PORTD_IN & TASTER_PFORTE)==0 )
 	{
-		ring_bel(1);
+		ring_bel(0);
 	}
 }

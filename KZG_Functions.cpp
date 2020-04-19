@@ -6,24 +6,225 @@
  */
 
 #include "Klingelzugang.h"
+#include "ComReceiver.h"
+#include "Externals.h"
+#include "../Secrets/secrets.h"
 
 //const char *fehler_text[]={"Speicherfehler","Parameterfehler","keine SMS","kein Handy","Antwort falsch",
 //"Job Fehler","keine Uebertragung"};
 
 
+/*
 uint8_t rec_state_KNET=RCST_WAIT;
 uint8_t function_KNET=0;
 uint8_t job_KNET=0;
 
 char *parameter_text_KNET=NULL;
 uint8_t parameter_text_length_KNET;
-uint8_t parameter_text_pointer_KNET;
+uint8_t parameter_text_pointer_KNET;*/
 
 /*uint8_t bootloader_attention;		// nur wenn true, dann darf Bootloader gestartet werden.
 uint8_t reset_attention;			// nur wenn true, dann darf Reset ausgeloest werden.
 
 void (*bootloader)( void ) = (void (*)(void)) (BOOT_SECTION_START/2);       // Set up function pointer
 void (*reset)( void ) = (void (*)(void)) 0x0000;       // Set up function pointer*/
+
+
+#define NUM_KZG_COMMANDS 20
+
+COMMAND knetCommands[NUM_KZG_COMMANDS] =
+{
+  {'S','K',CUSTOMER,STRING,16,jobSetSecurityKey},
+  {'S','k',CUSTOMER,NOPARAMETER,0,jobGetSecurityKey},
+  {'S','C',DEVELOPMENT,NOPARAMETER,0,jobGetCompilationDate},
+  {'S','T',DEVELOPMENT,NOPARAMETER,0,jobGetCompilationTime},
+  {'S','m',PRODUCTION,NOPARAMETER,0,jobGetFreeMemory},
+  {'R','g',CUSTOMER,NOPARAMETER,0,jobGetRandom},      // JOB_GET_RANDOM
+  {'R','n',CUSTOMER,NOPARAMETER,0,jobNewRandom},      // JOB_NEW_RANDOM
+  {'D','c',CUSTOMER,NOPARAMETER,0,jobClearAutoDoor},  // JOB_AUTO_DOOR_OFF
+  {'D','A',CUSTOMER,NOPARAMETER,0,jobDoAutoDoor},     // JOB_AUTO_DOOR
+  {'K','r',CUSTOMER,NOPARAMETER,0,jobKlingel},        // JOB_KLINGEL
+  {'C','K',CUSTOMER,BYTEARRAY,16,jobGetCardKey},          // JOB_GET_KEY
+  {'C','I',CUSTOMER,BYTEARRAY,16,jobGetCardInfo},         // JOB_GET_INFO
+  {'D','t',CUSTOMER,BYTEARRAY,16,jobTryInfo},             // JOB_TRY_INFO
+  {'C','t',CUSTOMER,BYTEARRAY,4,jobTryCode},             // JOB_TRY_CODE
+  {'P','t',CUSTOMER,NOPARAMETER,0,jobPirTrigger},         //
+  {'L','N',CUSTOMER,NOPARAMETER,0,jobNextLichtStatus},    // JOB_RESET			'R'
+  {'M','A',PRODUCTION,STRING,16,setBootloaderAttention},    //JOB_BL_ATTENTION
+  {'M','B',PRODUCTION,NOPARAMETER,0,startBootloader},    // JOB_BL_START		'B'
+  {'M','T',CUSTOMER,NOPARAMETER,0,NULL},
+  {'M','t',CUSTOMER,NOPARAMETER,0,NULL},
+};
+
+#define NUM_KZG_INFORMATION 1
+
+INFORMATION knetInformation[NUM_KZG_INFORMATION]=
+{
+  {"CQ",'C','1','l',FLOAT,1,(void*)&fHelligkeit,NULL}
+};
+
+ComReceiver knetCom(&kmulti,Node, knetCommands,NUM_KZG_COMMANDS, knetInformation,NUM_KZG_INFORMATION);
+
+
+void jobNextLichtStatus(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  my_random_timer.Make_New();
+
+  if(iLichtKleinStatus<2)
+    iLichtKleinStatus++;
+  else
+    iLichtKleinStatus=0;
+  kmulti.broadcastUInt8(iLichtKleinStatus,'L','1','s');
+  cmulti.broadcastUInt8(iLichtKleinStatus,'L','1','s');
+}
+
+void jobPirTrigger(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  my_random_timer.Make_New();
+  cmulti.broadcastUInt8(iLichtKleinStatus,function,address,job);
+}
+
+void jobGetRandom(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  uint8_t adr = getAddress(address);
+  if(adr<2)
+  {
+    LED_ROT_OFF;
+    my_random_timer.Make_New();
+    my_random_timer.GetRandom(Actual_Random[adr]);
+    WDT_Reset();
+    comRec->Getoutput()->setEncryption();
+    comRec->Getoutput()->sendStandardByteArray(Actual_Random[adr],16,Bedienung,'R',address,'s','T');
+    WDT_Reset();
+    //encrypt.Output_Encrypt(&serKNET,'B','R','S',Actual_Random[address]); // Zielangaben sind noch unklar
+  }
+}
+
+void jobNewRandom(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  my_random_timer.Make_New();
+}
+
+void jobClearAutoDoor(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  auto_door_status = false;
+  broadcastOpenDoorStatus();
+  my_random_timer.Make_New();
+}
+
+void jobDoAutoDoor(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  my_random_timer.Make_New();
+  if (auto_door_status==true)
+  {
+    open_door(true);
+  }
+  else
+  {
+    if (MyTimers[TIMER_STOP_DOOR].state == TM_RUN)
+    {
+      //send_answer(&serKNET,"enabled",true);
+      auto_door_status = true;
+    }
+    else
+    {
+      //send_answer(&serKNET,"nope",false);
+      auto_door_status = false;
+    }
+    broadcastOpenDoorStatus();
+  }
+}
+
+
+
+void jobKlingel(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  my_random_timer.Make_New();
+  uint8_t adr = getAddress(address);
+  auto_door_status = false;
+  ring_bel(adr);
+}
+
+/* Sendet den Key der Karte mit der Nummer keynum. Die ersten Stellen enthalten den Key, der Rest ActualRandom */
+void jobGetCardKey(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+uint8_t tosend[KEY_LENGTH];
+uint8_t i,keynum;
+
+  uint8_t adr = getAddress(address);
+  keynum = ( (uint8_t*)pMem )[0];
+	if (keynum<KEY_NUM)
+	{
+		for (i=0;i<KEY_LENGTH;i++)
+		{
+			tosend[i] = eeprom_read_byte(&KeyList[keynum][i]);
+		}
+    comRec->Getoutput()->setEncryption(Actual_Random[adr]);
+    comRec->Getoutput()->sendStandardByteArray(tosend,KEY_LENGTH,Bedienung,'C',address,'k','T');
+  }
+}
+
+/* Sendet den Info der Karte mit der Nummer keynum. Die ersten Stellen enthalten den Info, der Rest ActualRandom */
+void jobGetCardInfo(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+	uint8_t tosend[INFO_LENGTH];
+	uint8_t i,infonum;
+
+  uint8_t adr = getAddress(address);
+  infonum = ( (uint8_t*)pMem )[0];
+  if (infonum<INFO_NUM)
+	{
+		for (i=0;i<INFO_LENGTH;i++)
+		{
+			tosend[i] =  eeprom_read_byte(&InfoList[infonum][i]);
+		}
+    comRec->Getoutput()->setEncryption(Actual_Random[adr]);
+    comRec->Getoutput()->sendStandardByteArray(tosend,INFO_LENGTH,Bedienung,'C',address,'i','T');
+	}
+}
+
+void jobTryInfo(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+uint8_t i;
+
+  my_random_timer.Make_New();
+  auto_door_status = false;
+  uint8_t adr = getAddress(address);
+  for(i=0;i<16;i++)
+    ((uint8_t*)pMem)[i] = ((uint8_t*)pMem)[i] ^ Actual_Random[adr][i];
+  open_door(check_info((uint8_t*)pMem) );
+}
+
+void jobTryCode(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+uint8_t i,j,right;
+
+  my_random_timer.Make_New();
+  auto_door_status = false;
+  uint8_t adr = getAddress(address);
+  for(i=0;i<16;i++)
+    ((uint8_t*)pMem)[i] = ((uint8_t*)pMem)[i] ^ Actual_Random[adr][i];
+
+  right = true;
+  j=0;
+  do
+  {
+    i=0;
+    do
+    {
+      if (  (( (uint8_t*)pMem)[i] )!=eeprom_read_byte((uint8_t*)&CodeList[j][i])  )
+        right = false;
+      else
+        right = true;
+      i++;
+    }while( (i<4) && (right) );
+    j++;
+  }while( (j<INFO_NUM) && (right==false) );
+  open_door(right);
+}
+
+
+/*
 
 void rec_KNET()
 {
@@ -172,36 +373,36 @@ uint8_t right;
 				}
 			break;
 
-/*			case FUNCTION_SYSTEM:
-				switch( job_KNET )
-				{
-					case JOB_BL_ATTENTION:
-						send_answer(KNET,"Bootattention",true);
-					break;
-					case JOB_BL_START:
-						send_answer(KNET,"Goto bootloader",true);
-						_delay_ms(600);
-						bootloader();
-					break;
-					case JOB_RESET_ACT:
-						send_answer(KNET,"Wait Reset",true);
-					break;
-					case JOB_RESET:
-						send_answer(KNET,"Do Reset",true);
-						reset();
-					break;
-				}
-			break;*/
-/*			case FUNCTION_BOOT:
-				switch(job_KNET)
-				{
-					case DO_BOOTLOAD:
-						send_answer(KNET,"Goto bootloader",true);
-						_delay_ms(600);
-						bootloader();
-					break;
-				}
-			break;*/
+//			case FUNCTION_SYSTEM:
+//				switch( job_KNET )
+//				{
+//					case JOB_BL_ATTENTION:
+//						send_answer(KNET,"Bootattention",true);
+//					break;
+//					case JOB_BL_START:
+//						send_answer(KNET,"Goto bootloader",true);
+//						_delay_ms(600);
+//						bootloader();
+//					break;
+//					case JOB_RESET_ACT:
+//						send_answer(KNET,"Wait Reset",true);
+//					break;
+//					case JOB_RESET:
+//						send_answer(KNET,"Do Reset",true);
+//						reset();
+//					break;
+//				}
+//			break;
+//  		case FUNCTION_BOOT:
+//				switch(job_KNET)
+//				{
+//					case DO_BOOTLOAD:
+//						send_answer(KNET,"Goto bootloader",true);
+//						_delay_ms(600);
+//						bootloader();
+//					break;
+//				}
+//			break;
 		}
 		rec_state_KNET = RCST_WAIT;
 		job_KNET = 0;
@@ -249,14 +450,14 @@ void rec_state_machine_KNET(void)  //   NodeJob
 //					bootloader_attention=false;
 					switch( act_char )
 					{
-/*						case FUNCTION_SYSTEM:
-							bootloader_attention=temp;
-							function_KNET = act_char;
-						break;
-						case FUNCTION_BOOT:
-							function_KNET = act_char;
-						break;
-						bootloader_attention = false;*/
+//						case FUNCTION_SYSTEM:
+//							bootloader_attention=temp;
+//							function_KNET = act_char;
+//						break;
+//						case FUNCTION_BOOT:
+//							function_KNET = act_char;
+//						break;
+//						bootloader_attention = false;
 						case FUNCTION_RANDOM:
 							function_KNET = act_char;
 						break;
@@ -340,47 +541,47 @@ void rec_state_machine_KNET(void)  //   NodeJob
 						break;
 					}
 					break;
-/*					case FUNCTION_SYSTEM:
-					switch( act_char )
-					{
-						case JOB_BL_ATTENTION:
-							job_KNET = act_char;
-							bootloader_attention = true;
-						break;
-						case JOB_BL_START:
-							if( bootloader_attention==true )
-								job_KNET = act_char;
-							else
-							{
-								bootloader_attention = false;
-								function_KNET = 0;
-								job_KNET = 0;
-								rec_state_KNET = RCST_WAIT;
-							}
-						break;
-						case JOB_RESET_ACT:
-						job_KNET = act_char;
-						reset_attention = true;
-						break;
-						case JOB_RESET:
-						if( reset_attention==true )
-						job_KNET = act_char;
-						else
-						{
-							reset_attention = false;
-							function_KNET = 0;
-							job_KNET = 0;
-							rec_state_KNET = RCST_WAIT;
-						}
-						break;
-						default:
-						bootloader_attention = false;
-						function_KNET = 0;
-						job_KNET = 0;
-						rec_state_KNET = RCST_WAIT;
-						break;
-					}
-					break;*/
+//					case FUNCTION_SYSTEM:
+//					switch( act_char )
+//					{
+//						case JOB_BL_ATTENTION:
+//							job_KNET = act_char;
+//							bootloader_attention = true;
+//						break;
+//						case JOB_BL_START:
+//							if( bootloader_attention==true )
+//								job_KNET = act_char;
+//							else
+//							{
+//								bootloader_attention = false;
+//								function_KNET = 0;
+//								job_KNET = 0;
+//								rec_state_KNET = RCST_WAIT;
+//							}
+//						break;
+//						case JOB_RESET_ACT:
+//						job_KNET = act_char;
+//						reset_attention = true;
+//						break;
+//						case JOB_RESET:
+//						if( reset_attention==true )
+//						job_KNET = act_char;
+//						else
+//						{
+//							reset_attention = false;
+//							function_KNET = 0;
+//							job_KNET = 0;
+//							rec_state_KNET = RCST_WAIT;
+//						}
+//						break;
+//						default:
+//						bootloader_attention = false;
+//						function_KNET = 0;
+//						job_KNET = 0;
+//						rec_state_KNET = RCST_WAIT;
+//						break;
+//					}
+//					break;
 					default:
 						function_KNET = 0;
 						job_KNET = 0;
@@ -478,8 +679,9 @@ void send_command(Serial* file, char *command)
 	file->transmit('<');
 	file->transmit('\\');
 }
-
+*/
 /* Sendet den Key der Karte mit der Nummer keynum. Die ersten Stellen enthalten den Key, der Rest ActualRandom */
+/*
 uint8_t send_key(Serial* file, uint8_t keynum)
 {
 uint8_t tosend[16];
@@ -501,8 +703,9 @@ uint8_t i;
 	else
 		return(false);
 }
-
+*/
 /* Sendet den Info der Karte mit der Nummer keynum. Die ersten Stellen enthalten den Info, der Rest ActualRandom */
+/*
 uint8_t send_info(Serial* file, uint8_t infonum)
 {
 	uint8_t tosend[16];
@@ -524,16 +727,13 @@ uint8_t send_info(Serial* file, uint8_t infonum)
 	else
 	return(false);
 }
+*/
 
 /* Prüft auf richtigen Key: Information: 1./2. Byte Kartennummer dezimal, 3. .. Info, Rest ActualRandom */
-uint8_t check_info(char *data)
+uint8_t check_info(uint8_t *data)
 {
 uint8_t cardnum,i;
 uint8_t info_ok = false;
-	for (i=0;i<16;i++)
-	{
-		data[i] = data[i] ^ Actual_Random[i];
-	}
 	cardnum = data[0];
 	if (cardnum<INFO_NUM)
 	{
@@ -585,24 +785,52 @@ void open_door(uint8_t open)
 		OEFFNEN_2;
 		MyTimers[TIMER_STOP_DOOR].value = 700;
 		MyTimers[TIMER_STOP_DOOR].state = TM_START;
-		send_answer(&serKNET,"iO",true);
 		LED_ROT_OFF;
+		make_blocking(true);
+		kmulti.sendCommand(Bedienung,'D','1','o');
 	}
 	else
 	{
-		send_answer(&serKNET,"niO",false);
+		make_blocking(false);
 		MyTimers[TIMER_ROT_TOGGLE].state = TM_START;
 	}
+  kmulti.sendStandardInt(Bedienung,'C','1','b',BlockingStatus);
 }
 
 void ring_bel(uint8_t klingel)
 {
-	if (klingel == 1)
-		KLINGEL1_START;
+	if (klingel == 0)
+		KLINGEL0_START;
 	else
-		KLINGEL2_START;
+		KLINGEL1_START;
 	LED_ROT_ON;
 	MyTimers[TIMER_STOP_RING_BEL].value = 700;
 	MyTimers[TIMER_STOP_RING_BEL].state = TM_START;
+	cmulti.broadcastUInt8(klingel,'K',klingel,'r');
+}
+
+uint8_t getAddress(char adr)
+{
+  if(adr== '1')
+    return(1);
+  else
+    return(0);
+}
+
+void make_blocking(uint8_t reset)
+{
+  if(reset==true)
+  {
+    BlockingStatus = UNBLOCKED;
+    MyTimers[TIMER_BLOCKING_END].state = TM_STOP;
+  }
+  else
+  {
+    BlockingStatus+=1;
+    if(BlockingStatus == BLOCKED_LAST)
+      BlockingStatus--;
+    MyTimers[TIMER_BLOCKING_END].value = BlockadeZeiten[BlockingStatus-1];
+    MyTimers[TIMER_BLOCKING_END].state = TM_RESET;
+  }
 }
 

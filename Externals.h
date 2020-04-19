@@ -17,31 +17,34 @@
 
 
 extern const char *Node;
-
-extern char Compilation_Date[];
-extern char Compilation_Time[];
+extern const char *Bedienung;
 
 volatile extern TIMER MyTimers[MYTIMER_NUM];
 
 extern RandomTimer my_random_timer;
-extern const char *fehler_text[];
+
+extern volatile float fHelligkeit;
+extern volatile uint16_t iLichtgrenzwert,iLichtwertHysterese;
+extern volatile uint8_t iLichtKleinStatus;
+
+extern volatile uint8_t BlockingStatus;
+extern uint16_t BlockadeZeiten[];
 
 extern uint8_t key[16];
 extern Encrypt encrypt;
-extern uint8_t Actual_Random[16];
+extern uint8_t Actual_Random[2][16];
 
 extern volatile uint8_t do_sleep;
 extern volatile uint8_t auto_door_status;
-
-extern uint8_t be_master;
-extern uint8_t be_tunnel;
 
 extern char CodeList[INFO_NUM][5] ;
 extern uint8_t KeyList[KEY_NUM][KEY_LENGTH];
 extern uint8_t InfoList[KEY_NUM][INFO_LENGTH];
 
 extern Communication cmulti;
-extern Serial serKNET;
+extern Communication kmulti;
+
 extern ComReceiver cnetCom;
+extern ComReceiver knetCom;
 
 #endif /* EXTERNALS_H_ */

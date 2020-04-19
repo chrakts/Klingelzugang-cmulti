@@ -6,13 +6,13 @@
  */
 
 
-
 #ifndef CNET_FUNCTIONS_H_
 #define CNET_FUNCTIONS_H_
 
 #include "Communication.h"
 #include "ComReceiver.h"
 
+/*
 #define NODE			'Z'
 
 #define FUNCTION_SYSTEM		'S'
@@ -46,11 +46,11 @@
 #define DO_BOOTLOAD 	's'
 
 #define JOB_ERROR		'!'
+*/
 
 
-
-
-void jobGotCRCError(ComReceiver *output, char function,char address,char job, void * pMem);
+void setStatusLichtKlein(ComReceiver *comRec, char function,char address,char job, void * pMem);
+void jobSetLichtGrenzwert(ComReceiver *comRec, char function,char address,char job, void * pMem);
 void jobGetCTemperatureSensor(ComReceiver *output, char function,char address,char job, void * pMem);
 void jobGetCHumiditySensor(ComReceiver *output, char function,char address,char job, void * pMem);
 void jobGetCAbsHumiditySensor(ComReceiver *output, char function,char address,char job, void * pMem);
@@ -69,10 +69,8 @@ void jobGotExternalTemperature(ComReceiver *output, char function,char address,c
 void startBootloader(ComReceiver *comRec, char function,char address,char job, void * pMem);
 void setBootloaderAttention(ComReceiver *comRec, char function,char address,char job, void * pMem);
 
+void gotNewBrightness();
 
-//void rec_state_machine_CNET(void) ;
-//void rec_CNET();
-void direct_channel();
-void free_parameter_CNET(void);
+
 
 #endif /* CNET_FUNCTIONS_H_ */

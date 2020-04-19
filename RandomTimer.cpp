@@ -1,4 +1,4 @@
-/* 
+/*
 * RandomTimer.cpp
 *
 * Created: 17.11.2015 21:02:44
@@ -22,7 +22,7 @@ RandomTimer::RandomTimer(TC1_t *tm)
 	timer->CTRLD = 0;
 	timer->CTRLE = 0;
 	position = 0;
-} 
+}
 
 uint16_t RandomTimer::GetValue()
 {

@@ -50,6 +50,7 @@
 			<Add directory="/home/chrak/Daten/Software/repositories/xmegaClocks" />
 			<Add directory="/home/chrak/Daten/Software/repositories/communication" />
 			<Add directory="/home/chrak/Daten/Software/repositories/ComReceiver" />
+			<Add directory="/home/chrak/Daten/Software/repositories/Secrets" />
 		</Compiler>
 		<Linker>
 			<Add option="-mmcu=atxmega32a4u" />
@@ -68,12 +69,12 @@
 		<Unit filename="../ComReceiver/ComReceiver.h" />
 		<Unit filename="../ComReceiver/Operators.cpp" />
 		<Unit filename="../ComReceiver/Operators.h" />
+		<Unit filename="../ComReceiver/cmultiStandardCommands.cpp" />
+		<Unit filename="../ComReceiver/cmultiStandardCommands.h" />
 		<Unit filename="../Secrets/secrets.h" />
 		<Unit filename="../communication/CRC_Calc.cpp" />
 		<Unit filename="../communication/CRC_Calc.h" />
-		<Unit filename="../communication/Cmulti2Buffer.cpp" />
 		<Unit filename="../communication/Cmulti2Buffer.h" />
-		<Unit filename="../communication/CmultiBusy.cpp" />
 		<Unit filename="../communication/CmultiBusy.h" />
 		<Unit filename="../communication/Communication.cpp" />
 		<Unit filename="../communication/Communication.h" />
@@ -84,8 +85,6 @@
 		<Unit filename="../xmegaClocks/xmegaClocks.h" />
 		<Unit filename="CNET_Functions.cpp" />
 		<Unit filename="CNET_Functions.h" />
-		<Unit filename="CommandFunctions.cpp" />
-		<Unit filename="CommandFunctions.h" />
 		<Unit filename="Externals.h" />
 		<Unit filename="Global_Vars.cpp" />
 		<Unit filename="KZG_Functions.cpp" />
@@ -102,9 +101,10 @@
 		<Unit filename="asmdefs.h" />
 		<Unit filename="encrypt.cpp" />
 		<Unit filename="encrypt.hpp" />
+		<Unit filename="keys.cpp" />
+		<Unit filename="keys.h" />
 		<Unit filename="myConstants.h" />
-		<Unit filename="twi_master_driver.cpp" />
-		<Unit filename="twi_master_driver.h" />
+		<Unit filename="uartHardware.h" />
 		<Unit filename="watchdog.cpp" />
 		<Unit filename="watchdog.h" />
 		<Extensions>

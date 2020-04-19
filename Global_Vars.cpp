@@ -10,10 +10,7 @@
 #include "Klingelzugang.h"
 
 const char *Node = "Kg";
-
-char Compilation_Date[] = __DATE__;
-char Compilation_Time[] = __TIME__;
-
+const char *Bedienung = "ZB";
 
 volatile TIMER MyTimers[MYTIMER_NUM]=	{	{TM_STOP,RESTART_NO,100,0,Beeper_Ready},
 											{TM_STOP,RESTART_NO,100,0,NULL},
@@ -21,33 +18,26 @@ volatile TIMER MyTimers[MYTIMER_NUM]=	{	{TM_STOP,RESTART_NO,100,0,Beeper_Ready},
 											{TM_START,RESTART_NO,1200,0,goto_sleep},
 											{TM_STOP,RESTART_NO,250,0,Stop_Open_Door},
 											{TM_STOP,RESTART_NO,600,0,Stop_Ring_Bel},
-											{TM_STOP,RESTART_YES,20,0,LED_rot_toggle}
+											{TM_STOP,RESTART_YES,20,0,LED_rot_toggle},
+                      {TM_STOP,RESTART_NO,250,0,BlockingEnde}	// Blockade nach falscher Eingabe
+
 };
 
 RandomTimer my_random_timer(&TCC1);
 
-const char *fehler_text[]={"Speicherfehler","Parameterfehler","keine SMS","kein Handy","Antwort falsch",
-"Job Fehler","keine Uebertragung"};
-
-
 Encrypt encrypt((uint8_t*)key);
 
+volatile float fHelligkeit;
+volatile uint16_t iLichtgrenzwert=200,iLichtwertHysterese=50;
+volatile uint8_t iLichtKleinStatus = 0;
+
+volatile uint8_t BlockingStatus = UNBLOCKED;
+uint16_t BlockadeZeiten[BLOCKED_LAST] = {250,1000,1000,3000,5000,15000,60000};
 
 volatile uint8_t do_sleep = 0;
 
 volatile uint8_t auto_door_status = false;
 
+Communication cmulti(CNET,Node,5,USE_BUSY_0);
+Communication kmulti(KNET,Node,5,USE_BUSY_1);
 
-uint8_t be_master = 0;
-uint8_t be_tunnel = 0;
-
-char Code[5]="----";
-/* Global variables for TWI */
-TWI_Master_t twiC_Master;    /*!< TWI master module. */
-TWI_Master_t twiE_Master;    /*!< TWI master module. */
-
-/*! Buffer with test data to send for TWI*/
-uint8_t sendBuffer[NUM_BYTES] = {0x55, 0xAA, 0xF0, 0x0F, 0xB0, 0x0B, 0xDE, 0xAD};
-
-Communication cmulti(CNET,Node,5);
-Serial serKNET(KNET);

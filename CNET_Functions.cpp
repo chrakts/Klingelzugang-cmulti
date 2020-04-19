@@ -6,130 +6,66 @@
  */
 #include "Klingelzugang.h"
 #include "ComReceiver.h"
+#include "cmultiStandardCommands.h"
 #include "Externals.h"
 #include "../Secrets/secrets.h"
-/*
-uint8_t rec_state_CNET=RCST_WAIT;
-uint8_t function_CNET=0;
-uint8_t job_CNET=0;
 
-char *parameter_text_CNET=NULL;
-uint8_t parameter_text_length_CNET;
-uint8_t parameter_text_pointer_CNET;
-*/
-uint8_t bootloader_attention;		// nur wenn true, dann darf Bootloader gestartet werden.
 uint8_t dc_attention;				// nur wenn true, dann darf direct-channel hergestellt werden.
-uint8_t reset_attention;			// nur wenn true, dann darf Reset ausgeloest werden.
 
 float fExternalTemperature;
 
-void (*bootloader)( void ) = (void (*)(void)) (BOOT_SECTION_START/2);       // Set up function pointer
-void (*reset)( void ) = (void (*)(void)) 0x0000;       // Set up function pointer
-
-
-#define NUM_COMMANDS 16
-
+#define NUM_COMMANDS 15
 COMMAND cnetCommands[NUM_COMMANDS] =
 {
-  {'-','-',CUSTOMER,NOPARAMETER,0,jobGotCRCError}, // Achtung, muss immer der erste sein
-  {'S','K',CUSTOMER,STRING,16,jobSetSecurityKey},
-  {'S','k',CUSTOMER,NOPARAMETER,0,jobGetSecurityKey},
-  {'S','C',DEVELOPMENT,NOPARAMETER,0,jobGetCompilationDate},
-  {'S','T',DEVELOPMENT,NOPARAMETER,0,jobGetCompilationTime},
-  {'S','m',PRODUCTION,NOPARAMETER,0,jobGetFreeMemory},
-  {'M','A',CUSTOMER,STRING,16,setBootloaderAttention},    //JOB_BL_ATTENTION
-  {'M','B',CUSTOMER,NOPARAMETER,0,startBootloader},    // JOB_BL_START		'B'
-  {'M','r',CUSTOMER,NOPARAMETER,0,NULL},    // JOB_RESET_ACT		'r'
-  {'M','R',CUSTOMER,NOPARAMETER,0,NULL},    // JOB_RESET			'R'
+  cmultiStandardCommands,
+  {'L','g',CUSTOMER,UINT_16,1,jobSetLichtGrenzwert},    // JOB_RESET_ACT		'r'
+  {'L','S',CUSTOMER,NOPARAMETER,1,setStatusLichtKlein},    // JOB_RESET_ACT		'r'
+  {'X','s',CUSTOMER,NOPARAMETER,0,NULL},    // JOB_RESET			'R'
   {'M','D',CUSTOMER,NOPARAMETER,0,NULL},    // JOB_DC_ATTENTION	'D'			// Direkten Channel zum rueckwaerigen Geraet
-  {'M','C',CUSTOMER,NOPARAMETER,0,NULL},    // JOB_DC_START		'C'
   {'M','M',CUSTOMER,NOPARAMETER,0,NULL},    // JOB_BE_MASTER		'M'
-  {'M','m',CUSTOMER,NOPARAMETER,0,NULL},    // JOB_RELEASE_MASTER	'm'
-  {'M','T',CUSTOMER,NOPARAMETER,0,NULL},    // JOB_BE_TUNNEL		'T'
-  {'M','t',CUSTOMER,NOPARAMETER,0,NULL},    // JOB_RELEASE_TUNNEL	't'
-
 };
 
 
 #define NUM_INFORMATION 1
-
 INFORMATION cnetInformation[NUM_INFORMATION]=
 {
-  {"CQ",'C','1','t',FLOAT,1,(void*)&fExternalTemperature,NULL}
+  {"CQ",'C','1','l',FLOAT,1,(void*)&fHelligkeit,gotNewBrightness}
 };
 
 ComReceiver cnetCom(&cmulti,Node, cnetCommands,NUM_COMMANDS, cnetInformation,NUM_INFORMATION);
 
-
-void jobGotCRCError(ComReceiver *comRec, char function,char address,char job, void * pMem)
+void gotNewBrightness()
 {
-	comRec->sendAnswer(fehler_text[CRC_ERROR],function,address,job,false);
+  kmulti.broadcastFloat(fHelligkeit,'C','1','l');
 }
 
-void setBootloaderAttention(ComReceiver *comRec, char function,char address,char job, void * pMem)
+void setStatusLichtKlein(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
-	if (strcmp((char *)pMem,BOOTLOADER_ATTENTION_KEY)==0)
-    bootloader_attention=true;
-  else
-    bootloader_attention=false;
+uint8_t temp;
+  temp = ((uint8_t *)pMem)[0];
+  if(temp>=0 && temp<=2)
+  {
+    iLichtKleinStatus = temp;
+    kmulti.broadcastUInt8(iLichtKleinStatus,'L','1','s');
+    cmulti.broadcastUInt8(iLichtKleinStatus,'L','1','s');
+  }
 }
 
-void startBootloader(ComReceiver *comRec, char function,char address,char job, void * pMem)
+void jobSetLichtGrenzwert(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
-  comRec->sendAnswer("GotoBootloader",function,address,job,true);
-  _delay_ms(600);
-  bootloader();
+uint16_t wert;
+  wert = ((uint16_t *)pMem)[0];
+  switch(address)
+  {
+    case 'g':
+      iLichtgrenzwert = wert;
+    break;
+    case 'h':
+      iLichtwertHysterese = wert;
+    break;
+  }
+  kmulti.broadcastUInt16(wert,function,address,job);
 }
-
-void jobSetSecurityKey(ComReceiver *comRec, char function,char address,char job, void * pMem)
-{
-uint8_t ret = true;
-	if (strcmp((char *)pMem,SECURITY_LEVEL_PRODUCTION_KEY)==0)
-	{
-    comRec->SetSecurityLevel(PRODUCTION);
-	}
-	else if(strcmp((char *)pMem,SECURITY_LEVEL_DEVELOPMENT_KEY)==0)
-	{
-    comRec->SetSecurityLevel(DEVELOPMENT);
-	}
-	else
-	{
-    comRec->SetSecurityLevel(CUSTOMER);
-		ret = false;
-	}
-	comRec->sendAnswerInt(function,address,job,comRec->GetSecurityLevel(),ret);
-}
-
-void jobGetSecurityKey(ComReceiver *comRec, char function,char address,char job, void * pMem)
-{
-	comRec->sendAnswerInt(function,address,job,comRec->GetSecurityLevel(),true);
-}
-
-
-void jobGetCompilationDate(ComReceiver *comRec, char function,char address,char job, void * pMem)
-{
-char temp[20];
-	strcpy(temp,Compilation_Date);
-	comRec->sendAnswer(temp,function,address,job,true);
-}
-
-void jobGetCompilationTime(ComReceiver *comRec, char function,char address,char job, void * pMem)
-{
-char temp[20];
-	strcpy(temp,Compilation_Time);
-	comRec->sendAnswer(temp,function,address,job,true);
-}
-
-void jobGetFreeMemory(ComReceiver *comRec, char function,char address,char job, void * pMem)
-{
-extern int __heap_start, *__brkval;
-int v;
-
-	uint16_t mem = (uint16_t) &v - (__brkval == 0 ? (uint16_t) &__heap_start : (uint16_t) __brkval);
-	comRec->sendAnswerInt(function,address,job,mem,true);
-}
-
-
 
 /*
 void rec_CNET()
@@ -636,6 +572,7 @@ void free_parameter_CNET(void)
 	parameter_text_length_CNET = 0;
 }
 */
+/*
 void direct_channel()
 {
 char got;
@@ -667,3 +604,4 @@ uint8_t start = 0;
 	LED_GRUEN_OFF;
 }
 
+*/

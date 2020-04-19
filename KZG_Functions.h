@@ -10,6 +10,7 @@
 #define KZG_FUNCTIONS_H_
 
 #include "Serial.h"
+#include "ComReceiver.h"
 
 #define NODE			'Z'
 
@@ -48,17 +49,31 @@
 //enum{ RCST_WAIT=0,RCST_ATTENTION,RCST_WAIT_NODE,RCST_WAIT_FUNCTION,RCST_WAIT_JOB,RCST_DO_JOB,RCST_WAIT_END1,RCST_WAIT_END2,RCST_GET_PARAMETER};
 
 
-void rec_KNET();
-void rec_state_machine_KNET(void);
+void jobNextLichtStatus(ComReceiver *comRec, char function,char address,char job, void * pMem);
+void jobPirTrigger(ComReceiver *comRec, char function,char address,char job, void * pMem);
+void jobGetRandom(ComReceiver *comRec, char function,char address,char job, void * pMem);
+void jobNewRandom(ComReceiver *comRec, char function,char address,char job, void * pMem);
+void jobClearAutoDoor(ComReceiver *comRec, char function,char address,char job, void * pMem);
+void jobDoAutoDoor(ComReceiver *comRec, char function,char address,char job, void * pMem);
+void jobKlingel(ComReceiver *comRec, char function,char address,char job, void * pMem);
+void jobGetCardKey(ComReceiver *comRec, char function,char address,char job, void * pMem);
+void jobGetCardInfo(ComReceiver *comRec, char function,char address,char job, void * pMem);
+void jobTryInfo(ComReceiver *comRec, char function,char address,char job, void * pMem);
+void jobTryCode(ComReceiver *comRec, char function,char address,char job, void * pMem);
+
+/*void rec_KNET();
+void rec_state_machine_KNET(void);*/
 void free_parameter_KNET(void);
 void send_answer(Serial* file, const char *answer, uint8_t no_error);
 void send_hex_answer(Serial* file, uint8_t *answer, uint8_t length, uint8_t no_error);
 void send_command(Serial* file, const char *command);
 uint8_t send_key(Serial* file, uint8_t keynum);
 uint8_t send_info(Serial* file, uint8_t infonum);
-uint8_t check_info(char *data);
+uint8_t check_info(uint8_t *data);
 uint8_t recode_data(char _node, char _function, char _job, char *original);
 void open_door(uint8_t open);
 void ring_bel(uint8_t klingel);
+uint8_t getAddress(char adr);
+void make_blocking(uint8_t reset);
 
 #endif /* KZG_FUNCTIONS_H_ */

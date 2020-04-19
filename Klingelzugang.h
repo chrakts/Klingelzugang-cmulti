@@ -43,9 +43,15 @@
 #include "xmegaClocks.h"
 #include "xmegaClocks.h"
 #include "Cmulti2Buffer.h"
-#include "CmultiBusy.h"
 #include "Communication.h"
 #include "Serial.h"
+#include "uartHardware.h"
+
+#define Stringize( L )     #L
+#define MakeString( M, L ) M(L)
+#define Line MakeString( Stringize, __LINE__ )
+#define Reminder __FILE__ "(" Line ") : Reminder: "
+
 
 
 typedef struct Timer TIMER;
@@ -75,8 +81,8 @@ typedef struct Timer TIMER;
 
 // ------------- PORT E -------------------
 #define I2C_PIN6_PIN		PIN0_bm
-#define KLINGEL2_PIN		PIN1_bm
-#define KLINGEL1_PIN		PIN2_bm
+#define KLINGEL1_PIN		PIN1_bm
+#define KLINGEL0_PIN		PIN2_bm
 
 // ------------- PORT C -------------------
 #define RS485_0_TE_PIN		PIN0_bm
@@ -110,9 +116,9 @@ typedef struct Timer TIMER;
 #define LED_GRUEN_OFF				PORTA_OUTSET = LED_GRUEN_PIN
 #define LED_GRUEN_TOGGLE			PORTA_OUTTGL = LED_GRUEN_PIN
 
+#define KLINGEL0_START				PORTE_OUTSET = KLINGEL0_PIN
 #define KLINGEL1_START				PORTE_OUTSET = KLINGEL1_PIN
-#define KLINGEL2_START				PORTE_OUTSET = KLINGEL2_PIN
-#define KLINGEL_STOP				PORTE_OUTCLR = KLINGEL1_PIN | KLINGEL2_PIN
+#define KLINGEL_STOP				PORTE_OUTCLR = KLINGEL0_PIN | KLINGEL1_PIN
 
 #define WANT_MASTER_ALERT			PORTC_OUTSET = STREET_WANT_MASTER
 #define WANT_MASTER_RELEASE			PORTC_OUTCLR = STREET_WANT_MASTER
@@ -122,6 +128,7 @@ typedef struct Timer TIMER;
 #define SCHLIESSEN_1				PORTA_OUTSET = OEFFNER_PIN_L
 #define SCHLIESSEN_2				PORTA_OUTCLR = OEFFNER_PIN_H
 
+enum{UNBLOCKED=0,BLOCKED0,BLOCKED1,BLOCKED2,BLOCKED3,BLOCKED4,BLOCKED5,BLOCKED_LAST};
 
 extern USART_t *mein_serial;
 
@@ -133,5 +140,5 @@ void init_io();
 void TransmitByte( USART_t *serial, int8_t data );
 void goto_sleep(int8_t test);
 void new_random();
-
+void broadcastOpenDoorStatus();
 #endif /* TEST01_H_ */
