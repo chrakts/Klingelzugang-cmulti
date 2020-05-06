@@ -50,3 +50,7 @@ keys.cpp
 keys.h
 
 -ffunction-sections
+
+*.depend
+
+*.layout
