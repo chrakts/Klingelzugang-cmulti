@@ -63,6 +63,7 @@
 #define Busy_Control_PinCtrl_0 JOIN3( PIN,RX_PIN_0,CTRL )
 #define Busy_Control_Port_0    SERIAL_PORT_0
 #define Busy_Control_IntVec_0  JOIN3(PORT,UART_PORT_0,_INT0_vect)
+#define Busy_Control_TimVec_0  JOIN4(TC,BUSY_TIMER_PORT,2,_LUNF_vect)
 
 //#define Busy_Control_Pin     PIN2_bm
 //#define Busy_Control_PinCtrl PIN2CTRL
@@ -85,6 +86,14 @@
 #define USART_RXCINTLVL_1 USART_RXCINTLVL_LO_gc
 #define USART_TXCINTLVL_1 USART_TXCINTLVL_LO_gc
 /* ###################### ########### ############################ */
+
+/* ###################### Busy-Timer  ############################ */
+// Dieser Timer wird dann für beide Ports verwendet (Timer2 L/H -> belegt damit auch Timer 1!)
+#define BUSY_TIMER_PORT C
+/* ###################### ########### ############################ */
+
+/* ----------------- automatische für Busy-Timer ---------------------- */
+#define BUSY_TIMER      JOIN3( TC,BUSY_TIMER_PORT,2 )
 
 /* ----------------- automatische Deklarationen ---------------------- */
 
@@ -121,6 +130,7 @@
 #define Busy_Control_PinCtrl_1 JOIN3( PIN,RX_PIN_1,CTRL )
 #define Busy_Control_Port_1    SERIAL_PORT_1
 #define Busy_Control_IntVec_1  JOIN3(PORT,UART_PORT_1,_INT1_vect)
+#define Busy_Control_TimVec_1  JOIN4(TC,BUSY_TIMER_PORT,2,_HUNF_vect)
 
 
 
