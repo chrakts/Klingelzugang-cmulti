@@ -32,7 +32,7 @@ INFORMATION cnetInformation[NUM_INFORMATION]=
   {"CQ",'C','1','l',FLOAT,1,(void*)&fHelligkeit,gotNewBrightness}
 };
 
-ComReceiver cnetCom(&cmulti,Node, cnetCommands,NUM_COMMANDS, cnetInformation,NUM_INFORMATION);
+ComReceiver cnetCom(&cmulti,Node, cnetCommands,NUM_COMMANDS, cnetInformation,NUM_INFORMATION,NULL,NULL);
 
 void gotNewBrightness()
 {

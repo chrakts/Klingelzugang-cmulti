@@ -14,12 +14,12 @@
 #include "Klingelzugang.h"
 #include "ComReceiver.h"
 #include "CNET_Functions.h"
+#include "RandomTimer.h"
+#include "encrypt.hpp"
 
 
 extern const char *Node;
 extern const char *Bedienung;
-
-volatile extern TIMER MyTimers[MYTIMER_NUM];
 
 extern RandomTimer my_random_timer;
 

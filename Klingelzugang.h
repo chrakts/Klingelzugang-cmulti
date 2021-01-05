@@ -24,7 +24,7 @@
 #include <stdlib.h>
 #include "UART.h"
 #include "CRC_Calc.h"
-#include "MyTimer.h"
+#include "myTimers.h"
 #include "KZG_Functions.h"
 #include "CNET_Functions.h"
 #include "Klingel.h"

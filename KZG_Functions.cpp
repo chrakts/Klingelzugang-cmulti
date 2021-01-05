@@ -63,7 +63,7 @@ INFORMATION knetInformation[NUM_KZG_INFORMATION]=
   {"CQ",'C','1','l',FLOAT,1,(void*)&fHelligkeit,NULL}
 };
 
-ComReceiver knetCom(&kmulti,Node, knetCommands,NUM_KZG_COMMANDS, knetInformation,NUM_KZG_INFORMATION);
+ComReceiver knetCom(&kmulti,Node, knetCommands,NUM_KZG_COMMANDS, knetInformation,NUM_KZG_INFORMATION,NULL,NULL);
 
 
 void jobNextLichtStatus(ComReceiver *comRec, char function,char address,char job, void * pMem)
