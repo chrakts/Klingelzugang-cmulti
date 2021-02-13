@@ -9,17 +9,44 @@
 
 void init_klingel()
 {
-	PORTD_OUTCLR = TASTER_SINK;
-	PORTD_INTCTRL = PORT_INT0LVL0_bm ; // Low-Level interrupt 0 for PORTA
-	PORTD_INT0MASK = TASTER_PFORTE;
-	PORTD_PIN2CTRL = PORT_ISC_FALLING_gc | PORT_OPC_PULLUP_gc | PORT_SRLEN_bm;
+	TASTERLEDSETUP;
+	TASTERINPUTSETUP;
+	TASTERLED_ON;
+	TASTER_PORT.INTCTRL  = PORT_INT0LVL0_bm ; // Low-Level interrupt 0 for PORTA
+	TASTER_PORT.INT0MASK = TASTER_INPUT;
+	TASTER_PORT.TASTER_INTPIN = PORT_ISC_FALLING_gc | PORT_OPC_PULLUP_gc | PORT_SRLEN_bm;
 }
 
-SIGNAL(PORTD_INT0_vect)
+void jobKlingel(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  auto_door_status = false;
+  ring_bel(address);
+}
+
+void ring_bel(char klingel)
+{
+	if (klingel == '1')
+  {
+		KLINGEL0_START;
+    LEDROT_ON;
+  }
+	else
+  {
+		KLINGEL1_START;
+		LEDGRUEN_ON;
+  }
+  my_random_timer.Make_New();
+	MyTimers[TIMER_STOP_RING_BEL].value = 700;
+	MyTimers[TIMER_STOP_RING_BEL].state = TM_START;
+	cmulti.broadcast('K',klingel,'r');
+}
+
+//SIGNAL(PORTD_INT0_vect)
+SIGNAL(TASTER_INT_VEC)
 {
 	_delay_ms(100);
-	if( (PORTD_IN & TASTER_PFORTE)==0 )
+	if( (TASTER_PORT.IN & TASTER_INPUT)==0 )
 	{
-		ring_bel(0);
+		ring_bel('1');
 	}
 }

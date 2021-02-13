@@ -55,7 +55,6 @@ void jobGetRandom(ComReceiver *comRec, char function,char address,char job, void
 void jobNewRandom(ComReceiver *comRec, char function,char address,char job, void * pMem);
 void jobClearAutoDoor(ComReceiver *comRec, char function,char address,char job, void * pMem);
 void jobDoAutoDoor(ComReceiver *comRec, char function,char address,char job, void * pMem);
-void jobKlingel(ComReceiver *comRec, char function,char address,char job, void * pMem);
 void jobGetCardKey(ComReceiver *comRec, char function,char address,char job, void * pMem);
 void jobGetCardInfo(ComReceiver *comRec, char function,char address,char job, void * pMem);
 void jobTryInfo(ComReceiver *comRec, char function,char address,char job, void * pMem);
@@ -72,8 +71,7 @@ uint8_t send_info(Serial* file, uint8_t infonum);
 uint8_t check_info(uint8_t *data);
 uint8_t recode_data(char _node, char _function, char _job, char *original);
 void open_door(uint8_t open);
-void ring_bel(uint8_t klingel);
-uint8_t getAddress(char adr);
+
 void make_blocking(uint8_t reset);
 
 #endif /* KZG_FUNCTIONS_H_ */

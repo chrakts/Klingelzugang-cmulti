@@ -11,6 +11,7 @@
 
 #include "Communication.h"
 #include "ComReceiver.h"
+#include "cmultiStandardCommands.h"
 
 /*
 #define NODE			'Z'
@@ -48,9 +49,18 @@
 #define JOB_ERROR		'!'
 */
 
+extern COMMAND cnetCommands[];
+extern INFORMATION cnetInformation[];
 
-void setStatusLichtKlein(ComReceiver *comRec, char function,char address,char job, void * pMem);
-void jobSetLichtGrenzwert(ComReceiver *comRec, char function,char address,char job, void * pMem);
+#define NUM_CNET_COMMANDS 9+CMULTI_STANDARD_NUM
+#define NUM_INFORMATION 1
+
+
+void jobSetLichtGrenzwerte(ComReceiver *comRec, char function,char address,char job, void * pMem);
+
+void mailPressed(ComReceiver *comRec, char function,char address,char job, void * pMem);
+void doorToggle(ComReceiver *comRec, char function,char address,char job, void * pMem);
+
 void jobGetCTemperatureSensor(ComReceiver *output, char function,char address,char job, void * pMem);
 void jobGetCHumiditySensor(ComReceiver *output, char function,char address,char job, void * pMem);
 void jobGetCAbsHumiditySensor(ComReceiver *output, char function,char address,char job, void * pMem);

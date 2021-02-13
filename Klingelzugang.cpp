@@ -7,33 +7,76 @@
 
 #include "Klingelzugang.h"
 
-int main(void)
+void init_io()
 {
-	init_clock(SYSCLK,PLL,true,CLOCK_CALIBRATION);
-	init_io();
+  init_clock(SYSCLK,PLL,true,CLOCK_CALIBRATION);
 
-	init_mytimer();
-	init_klingel();
-	//WDT_EnableAndSetTimeout(WDT_SHORT);
+#ifdef MAIN_BUILT
+	PORTA_DIRSET = 0xff;
+	PORTB_DIRSET = 0xff;
+	PORTC_DIRSET = RS485_0_TE_PIN | RS485_0_RE_PIN | RS485_0_TxD_PIN | STREET_WANT_MASTER;
+	PORTC_DIRCLR = RS485_0_RxD_PIN | STREET_LET_MASTER | STREET_OUT0 | STREET_OUT_RING;
+	PORTD_DIRSET =  DAC_PIN10_PIN | RS485_1_TERE_PIN | RS485_1_TxD_PIN | TASTER_SINK;
+	PORTD_DIRCLR =  TASTER_PFORTE | HOUSE_OUT0 | HOUSE_OUT_RING | RS485_1_RxD_PIN;
+	PORTE_DIRSET = 0xff;
+	PORTE_OUTCLR = KLINGEL0_PIN | KLINGEL1_PIN;
+//	PORTE_DIRCLR = ;
+	PORTA_OUTSET = OEFFNER_PIN_L | LEDROT_PIN | LEDGRUEN_PIN | LEDGELB_PIN;
+	PORTC_OUTSET = RS485_0_RE_PIN;
+#endif // MAIN_BUILT
 
-	LED_ROT_ON;
+#ifdef PLUG_BUILT
+
+	PORTA_DIRSET = PIN2_bm | PIN3_bm | PIN4_bm;
+	PORTA_OUTSET = 0xff;
+
+	PORTB_DIRSET = 0xff;
+
+	PORTC_DIRSET = PIN1_bm;
+
+	PORTD_DIRSET = PIN0_bm | PIN1_bm | PIN3_bm | PIN4_bm | PIN5_bm | PIN7_bm;
+	PORTD_DIRCLR = PIN2_bm | PIN6_bm;
+	PORTD_OUTCLR = PIN4_bm | PIN5_bm;
+
+	PORTE_DIRSET = 0xff;
+#endif // PLUG_BUILT
+
+
+	uint8_t i;
+	for(i=0;i<20;i++)
+	{
+		LEDGRUEN_TOGGLE;
+		_delay_ms(50);
+	}
+  LEDGRUEN_OFF;
 
 	PMIC_CTRL = PMIC_LOLVLEX_bm | PMIC_HILVLEN_bm | PMIC_MEDLVLEN_bm;
 	sei();
 
 	cmulti.open(Serial::BAUD_57600,F_CPU);
 	kmulti.open(Serial::BAUD_57600,F_CPU);
-  //serKNET.open(Serial::BAUD_19200,F_CPU);
+
+}
+
+
+int main(void)
+{
+	init_io();
+
+	cmulti.broadcastUInt8((uint8_t) RST.STATUS,'S','0','R');
+
   cmulti.encryptSetKey(key);
   kmulti.encryptSetKey(key);
 
+	init_mytimer();
+	init_klingel();
+	//WDT_EnableAndSetTimeout(WDT_SHORT);
+
 	WDT_Reset();
-	//_delay_ms(500);
-	uint8_t wert[1];
-	wert[0] = (RST.STATUS);
-	kmulti.sendByteArray(wert,1,BROADCAST,'S','S','0','R');
-	kmulti.sendInfo("Klingel zur Bedienung Neu","BR");
+	//kmulti.sendInfo("Klingel zur Bedienung Neu","BR");
+
   broadcastOpenDoorStatus();
+  cmulti.broadcastString("Hallo",'X','Y','Z');
 	do
 	{
 		//rec_KNET();
@@ -48,23 +91,6 @@ int main(void)
 }
 
 
-void init_io()
-{
-	PORTA_DIRSET = 0xff;
-//	PORTA_DIRCLR = ;
-	PORTB_DIRSET = 0xff;
-//	PORTB_DIRCLR = ;
-	PORTC_DIRSET = RS485_0_TE_PIN | RS485_0_RE_PIN | RS485_0_TxD_PIN | STREET_WANT_MASTER;
-	PORTC_DIRCLR = RS485_0_RxD_PIN | STREET_LET_MASTER | STREET_OUT0 | STREET_OUT_RING;
-	PORTD_DIRSET =  DAC_PIN10_PIN | RS485_1_TERE_PIN | RS485_1_TxD_PIN | TASTER_SINK;
-	PORTD_DIRCLR =  TASTER_PFORTE | HOUSE_OUT0 | HOUSE_OUT_RING | RS485_1_RxD_PIN;
-	PORTE_DIRSET = 0xff;
-	PORTE_OUTCLR = KLINGEL0_PIN | KLINGEL1_PIN;
-//	PORTE_DIRCLR = ;
-
-	PORTA_OUTSET = OEFFNER_PIN_L | LED_ROT_PIN | LED_GRUEN_PIN | LED_GELB_PIN;
-	PORTC_OUTSET = RS485_0_RE_PIN;
-}
 
 void broadcastOpenDoorStatus()
 {

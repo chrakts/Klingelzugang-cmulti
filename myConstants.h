@@ -11,6 +11,5 @@
 
 #define CLOCK_CALIBRATION 0x83
 
-
-
 #endif // MYCONSTANTS_H_INCLUDED
+

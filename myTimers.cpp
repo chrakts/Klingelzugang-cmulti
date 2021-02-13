@@ -15,24 +15,25 @@ void Beeper_Ready(uint8_t test)
 
 void LED_toggle(uint8_t test)
 {
-	LED_GELB_TOGGLE;
+	LEDGELB_TOGGLE;
 }
 
 void LED_rot_toggle(uint8_t test)
 {
-	LED_ROT_TOGGLE;
+	LEDROT_TOGGLE;
 }
 
 void Stop_Open_Door(uint8_t test)
 {
-	LED_GRUEN_OFF;
+	LEDGRUEN_OFF;
 	SCHLIESSEN_1;
 	SCHLIESSEN_2;
 }
 
 void Stop_Ring_Bel(uint8_t test)
 {
-	LED_ROT_OFF;
+	LEDROT_OFF;
+	LEDGRUEN_OFF;
 	KLINGEL_STOP;
 }
 

@@ -27,10 +27,6 @@ RandomTimer my_random_timer(&TCC1);
 
 Encrypt encrypt((uint8_t*)key);
 
-volatile float fHelligkeit;
-volatile uint16_t iLichtgrenzwert=200,iLichtwertHysterese=50;
-volatile uint8_t iLichtKleinStatus = 0;
-
 volatile uint8_t BlockingStatus = UNBLOCKED;
 uint16_t BlockadeZeiten[BLOCKED_LAST] = {250,1000,1000,3000,5000,15000,60000};
 
@@ -39,5 +35,8 @@ volatile uint8_t do_sleep = 0;
 volatile uint8_t auto_door_status = false;
 
 Communication cmulti(CNET,Node,5,USE_BUSY_0);
+ComReceiver cmultiRec(&cmulti,Node,cnetCommands,NUM_CNET_COMMANDS,cnetInformation,NUM_INFORMATION,NULL,NULL);
+
 Communication kmulti(KNET,Node,5,USE_BUSY_1);
+
 

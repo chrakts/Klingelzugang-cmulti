@@ -26,7 +26,7 @@
 #define RE_DISABLE_1	((PORT_t *) &SERIAL_PORT_1)->OUTSET = SERIAL_RE_PIN_1
 #define RE_ENABLE_1		((PORT_t *) &SERIAL_PORT_1)->OUTCLR = SERIAL_RE_PIN_1
 */
-enum{KNET=0,CNET};
+enum{CNET=0,KNET};
 
 void uart_init_0();
 void TransmitByte0( uint8_t data );

@@ -23,10 +23,6 @@ extern const char *Bedienung;
 
 extern RandomTimer my_random_timer;
 
-extern volatile float fHelligkeit;
-extern volatile uint16_t iLichtgrenzwert,iLichtwertHysterese;
-extern volatile uint8_t iLichtKleinStatus;
-
 extern volatile uint8_t BlockingStatus;
 extern uint16_t BlockadeZeiten[];
 
