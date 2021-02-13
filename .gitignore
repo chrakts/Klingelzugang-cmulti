@@ -54,3 +54,5 @@ keys.h
 *.depend
 
 *.layout
+
+sig.txt
