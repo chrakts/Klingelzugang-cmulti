@@ -104,7 +104,7 @@
   #define TC0_CCxEN_bm TC0_CCDEN_bm
   #define TCC_REMAPPING PORT_TC0D_bm
 #else
-  #pragma message "Ungültige Pinnummer für WS_OUTPIN"
+  #error "Ungültige Pinnummer für WS_OUTPIN"
 #endif // WS_OUTPIN
 
 
