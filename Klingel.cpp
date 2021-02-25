@@ -19,6 +19,7 @@ void init_klingel()
 
 void jobKlingel(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
+  wakeup();
   auto_door_status = false;
   ring_bel(address);
 }

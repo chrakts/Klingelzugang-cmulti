@@ -12,8 +12,9 @@ extern volatile uint16_t iLichtgrenzwert,iLichtwertHysterese;
 enum{LICHT_SET_AUS=0,LICHT_SET_EIN,LICHT_SET_AUTO,LICHT_SET_UNVALID};
 
 void setLichtSet(ComReceiver *comRec, char function,char address,char job, void * pMem);
-void sendLichtActualStatus(uint8_t adr);
-void calcLichtActualStatus();
+uint8_t calcHysterese(uint8_t oldValue);
+void calcAndSendLichtActualStatus();
+void updateLicht(uint8_t setStatus,char adr);
 void lightToggle(ComReceiver *comRec, char function,char address,char job, void * pMem);
 
 #endif // LICHT_H_INCLUDED

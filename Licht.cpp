@@ -5,12 +5,19 @@ volatile uint8_t iLichtKleinActual = 0;
 volatile uint8_t iLichtGrossSet    = LICHT_SET_AUS;
 volatile uint8_t iLichtGrossActual = 0;
 
-volatile float fHelligkeit;
+volatile float fHelligkeit=300;
 volatile uint16_t iLichtgrenzwert=200,iLichtwertHysterese=50;
 
 const char *LichtStatus[]={"aus","ein","Auto"};
 
-void calcLichtActualStatus()
+void updateLicht(uint8_t setStatus,char adr)
+{
+  cmulti.broadcastString(LichtStatus[setStatus],'L',adr,'s');  // send set status
+  calcAndSendLichtActualStatus();
+  sendSignalLamps();
+}
+
+void calcAndSendLichtActualStatus()
 {
 uint8_t oldStatus;
 
@@ -24,11 +31,11 @@ uint8_t oldStatus;
       iLichtKleinActual = LICHT_SET_EIN;
     break;
     case LICHT_SET_AUTO:
-
+      iLichtKleinActual = calcHysterese(oldStatus);
     break;
   }
   if( iLichtKleinActual!=oldStatus)
-    sendLichtActualStatus(1);
+    cmulti.broadcastUInt8(iLichtKleinActual,'L','1','a');         // send actual status
 
   oldStatus = iLichtGrossActual;
   switch(iLichtGrossSet)
@@ -40,68 +47,52 @@ uint8_t oldStatus;
       iLichtGrossActual = LICHT_SET_EIN;
     break;
     case LICHT_SET_AUTO:
-
+      iLichtGrossActual = calcHysterese(oldStatus);
     break;
   }
   if( iLichtGrossActual!=oldStatus)
-    sendLichtActualStatus(2);
+    cmulti.broadcastUInt8(iLichtGrossActual,'L','2','a');         // send actual status
+}
+
+uint8_t calcHysterese(uint8_t oldValue)
+{
+  if(oldValue==LICHT_SET_EIN)
+  {
+    if(fHelligkeit>(float)iLichtgrenzwert*(1.0+(float)iLichtwertHysterese/100.0))
+      return(LICHT_SET_AUS);
+  }
+  else
+  {
+    if(fHelligkeit<(float)iLichtgrenzwert)
+      return(LICHT_SET_EIN);
+  }
+  return( oldValue );
 }
 
 void lightToggle(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
+  wakeup();
   switch(address)
   {
     case '1':
       iLichtKleinSet += 1;
       if(iLichtKleinSet==LICHT_SET_UNVALID)
         iLichtKleinSet=LICHT_SET_AUS;
-      cmulti.broadcastString(LichtStatus[iLichtKleinSet],'L','1','s');
-      calcLichtActualStatus();
-      cmulti.broadcastUInt8(iLichtKleinActual,'L','1','a');
+      updateLicht(iLichtKleinSet,address);
     break;
     case '2':
       iLichtGrossSet += 1;
       if(iLichtGrossSet==LICHT_SET_UNVALID)
         iLichtGrossSet=LICHT_SET_AUS;
-      cmulti.broadcastString(LichtStatus[iLichtKleinSet],'L','2','s');
-      calcLichtActualStatus();
-      cmulti.broadcastUInt8(iLichtGrossActual,'L','2','a');
+      updateLicht(iLichtGrossSet,address);
     break;
-  }
-}
-
-
-void sendLichtActualStatus(uint8_t adr)
-{
-  if(adr == 1)
-  {
-    cmulti.broadcastUInt8(iLichtKleinActual,'L','1','a');
-    //kmulti.broadcastUInt8(iLichtKleinActual,'L','1','a');
-  }
-  else
-  {
-    cmulti.broadcastUInt8(iLichtGrossActual,'L','2','a');
-    //kmulti.broadcastUInt8(iLichtGrossActual,'L','2','a');
-  }
-}
-
-void sendLichtSetStatus(uint8_t adr)
-{
-  if(adr == 1)
-  {
-    cmulti.broadcastString(LichtStatus[iLichtKleinSet],'L','1','s');
-    //kmulti.broadcastUInt8(LichtStatus[iLichtKleinSet],'L','1','s');
-  }
-  else
-  {
-    cmulti.broadcastString(LichtStatus[iLichtKleinSet],'L','2','s');
-    //kmulti.broadcastUInt8(iLichtGrossActual,'L','2','a');
   }
 }
 
 void setLichtSet(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
 uint8_t status;
+   wakeup();
   // aus|ein|Auto
   switch(((char *)pMem)[0])
   {
@@ -120,11 +111,16 @@ uint8_t status;
   if(status != LICHT_SET_UNVALID)
   {
     if(address=='1')
+    {
       iLichtKleinSet = status;
+      updateLicht(iLichtKleinSet,address);
+    }
     else
+    {
       iLichtGrossSet = status;
-    cmulti.broadcastString((char *)pMem,function,address,job);  // informierte über neuen SET-Status
-    calcLichtActualStatus();
+      updateLicht(iLichtGrossSet,address);
+    }
+
   }
   else
     comRec->sendAnswer("UNVALID",function,address,job,false);

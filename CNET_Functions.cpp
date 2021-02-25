@@ -12,11 +12,6 @@
 #include "Externals.h"
 #include "../Secrets/secrets.h"
 
-uint8_t dc_attention;				// nur wenn true, dann darf direct-channel hergestellt werden.
-
-float fExternalTemperature;
-
-
 COMMAND cnetCommands[NUM_CNET_COMMANDS] =
 {
   cmultiStandardCommands,
@@ -29,6 +24,7 @@ COMMAND cnetCommands[NUM_CNET_COMMANDS] =
   {'M','p',CUSTOMER,NOPARAMETER,0,mailPressed},
   {'D','p',CUSTOMER,NOPARAMETER,0,doorToggle},
   {'K','r',CUSTOMER,NOPARAMETER,0,jobKlingel},
+  {'P','t',CUSTOMER,NOPARAMETER,0,jobPir},
 };
 
 
@@ -40,19 +36,21 @@ INFORMATION cnetInformation[NUM_INFORMATION]=
 
 ComReceiver cnetCom(&cmulti,Node, cnetCommands,NUM_CNET_COMMANDS, cnetInformation,NUM_INFORMATION,NULL,NULL);
 
-void mailPressed(ComReceiver *comRec, char function,char address,char job, void * pMem)
+void jobPir(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
+  wakeup();
 
 }
 
-void doorToggle(ComReceiver *comRec, char function,char address,char job, void * pMem)
+void mailPressed(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
+  wakeup();
 
 }
 
 void gotNewBrightness()
 {
-  kmulti.broadcastFloat(fHelligkeit,'C','1','l');
+  calcAndSendLichtActualStatus();
 }
 
 void jobSetLichtGrenzwerte(ComReceiver *comRec, char function,char address,char job, void * pMem)

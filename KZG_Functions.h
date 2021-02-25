@@ -70,8 +70,5 @@ uint8_t send_key(Serial* file, uint8_t keynum);
 uint8_t send_info(Serial* file, uint8_t infonum);
 uint8_t check_info(uint8_t *data);
 uint8_t recode_data(char _node, char _function, char _job, char *original);
-void open_door(uint8_t open);
-
-void make_blocking(uint8_t reset);
 
 #endif /* KZG_FUNCTIONS_H_ */

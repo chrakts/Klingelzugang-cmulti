@@ -23,17 +23,15 @@ extern const char *Bedienung;
 
 extern RandomTimer my_random_timer;
 
-extern volatile uint8_t BlockingStatus;
-extern uint16_t BlockadeZeiten[];
+
 
 extern uint8_t key[16];
 extern Encrypt encrypt;
 extern uint8_t Actual_Random[2][16];
 
 extern volatile uint8_t do_sleep;
-extern volatile uint8_t auto_door_status;
 
-extern char CodeList[INFO_NUM][5] ;
+
 extern uint8_t KeyList[KEY_NUM][KEY_LENGTH];
 extern uint8_t InfoList[KEY_NUM][INFO_LENGTH];
 

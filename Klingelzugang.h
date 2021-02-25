@@ -7,10 +7,8 @@
 #ifndef TEST01_H_
 #define TEST01_H_
 
-
-#define WS_ARCH_XMEGA
-
 #define INFO_NUM 10			// Anzahl der Karteninformationen
+//#define SPECIAL_NUM 10			// Anzahl der Karteninformationen
 #define KEY_NUM	 10			// Anzahl der Keys
 #define KEY_LENGTH 6
 #define INFO_LENGTH 6
@@ -50,6 +48,9 @@
 #include "uartHardware.h"
 #include "Licht.h"
 #include "codeInput.h"
+#include "door.h"
+#include "signalLamps.h"
+#include "ws2812.h"
 
 #define Stringize( L )     #L
 #define MakeString( M, L ) M(L)
@@ -192,18 +193,8 @@ typedef struct Timer TIMER;
 #define TASTER_INT_VEC     JOIN5( PORT,TASTER_PORT_C,_INT,TASTER_INT_NUM_C,_vect ) //PORTx_INTx_vect
 #pragma message "Taster-Interrupt: " XSTR(TASTER_INT_VEC)
 
-
-enum{UNBLOCKED=0,BLOCKED0,BLOCKED1,BLOCKED2,BLOCKED3,BLOCKED4,BLOCKED5,BLOCKED_LAST};
-
-extern USART_t *mein_serial;
-
-void be_master_fkt();
-void be_tunnel_fkt();
-void init_clock();
-void CLKSYS_AutoCalibration_Enable( uint8_t clkSource, bool extReference );
 void init_io();
-void TransmitByte( USART_t *serial, int8_t data );
-void goto_sleep(int8_t test);
-void new_random();
 void broadcastOpenDoorStatus();
+void wakeup();
+
 #endif /* TEST01_H_ */

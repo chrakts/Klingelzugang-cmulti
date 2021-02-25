@@ -7,6 +7,8 @@
 
 #include "Klingelzugang.h"
 
+typedef enum test{_A=17,_B=18,_C=19}TEST;
+
 void init_io()
 {
   init_clock(SYSCLK,PLL,true,CLOCK_CALIBRATION);
@@ -32,7 +34,7 @@ void init_io()
 
 	PORTB_DIRSET = 0xff;
 
-	PORTC_DIRSET = PIN1_bm;
+	PORTC_DIRSET = PIN0_bm | PIN4_bm| PIN3_bm;
 
 	PORTD_DIRSET = PIN0_bm | PIN1_bm | PIN3_bm | PIN4_bm | PIN5_bm | PIN7_bm;
 	PORTD_DIRCLR = PIN2_bm | PIN6_bm;
@@ -66,7 +68,7 @@ int main(void)
 	cmulti.broadcastUInt8((uint8_t) RST.STATUS,'S','0','R');
 
   cmulti.encryptSetKey(key);
-  kmulti.encryptSetKey(key);
+  //kmulti.encryptSetKey(key);
 
 	init_mytimer();
 	init_klingel();
@@ -75,21 +77,46 @@ int main(void)
 	WDT_Reset();
 	//kmulti.sendInfo("Klingel zur Bedienung Neu","BR");
 
-  broadcastOpenDoorStatus();
+  //broadcastOpenDoorStatus();
   cmulti.broadcastString("Hallo",'X','Y','Z');
+  WS_init();
+  //PORT_t *myp;
+	//myp = &PORTE;
+	//myp->REMAP = 1;
+  uint8_t led_loc[12];
+  uint8_t t;
+  for(t=0;t<12;t++)
+    led_loc[t] = 0x55;
 	do
 	{
 		//rec_KNET();
-		knetCom.comStateMachine();
-    knetCom.doJob();
+		//knetCom.comStateMachine();
+    //knetCom.doJob();
+    while (WS_out(led_loc,12,NULL)!=0)
+    {
+      LEDGRUEN_TOGGLE;
+      _delay_us(300);
+      LEDGRUEN_TOGGLE;
+      _delay_us(300);
+    }
+
 		cnetCom.comStateMachine();
     cnetCom.doJob();
-//		if(be_master>0)
-//			be_master_fkt();
+
+    sendSignalLamps();
 		WDT_Reset();
+
 	} while (1);
 }
 
+void wakeup()
+{
+  if(inputStatus == INPUT_SLEEP)
+  {
+    inputStatus = NO_INPUT;
+  }
+  MyTimers[TIMER_SLEEP].state = TM_START;
+}
 
 
 void broadcastOpenDoorStatus()
