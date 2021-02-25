@@ -11,35 +11,11 @@
 #include "Externals.h"
 #include "../Secrets/secrets.h"
 
-//const char *fehler_text[]={"Speicherfehler","Parameterfehler","keine SMS","kein Handy","Antwort falsch",
-//"Job Fehler","keine Uebertragung"};
-
-
-/*
-uint8_t rec_state_KNET=RCST_WAIT;
-uint8_t function_KNET=0;
-uint8_t job_KNET=0;
-
-char *parameter_text_KNET=NULL;
-uint8_t parameter_text_length_KNET;
-uint8_t parameter_text_pointer_KNET;*/
-
-/*uint8_t bootloader_attention;		// nur wenn true, dann darf Bootloader gestartet werden.
-uint8_t reset_attention;			// nur wenn true, dann darf Reset ausgeloest werden.
-
-void (*bootloader)( void ) = (void (*)(void)) (BOOT_SECTION_START/2);       // Set up function pointer
-void (*reset)( void ) = (void (*)(void)) 0x0000;       // Set up function pointer*/
-
-
-#define NUM_KZG_COMMANDS 20
+#define NUM_KZG_COMMANDS 13+CMULTI_STANDARD_NUM
 
 COMMAND knetCommands[NUM_KZG_COMMANDS] =
 {
-  {'S','K',CUSTOMER,STRING,16,jobSetSecurityKey},
-  {'S','k',CUSTOMER,NOPARAMETER,0,jobGetSecurityKey},
-  {'S','C',DEVELOPMENT,NOPARAMETER,0,jobGetCompilationDate},
-  {'S','T',DEVELOPMENT,NOPARAMETER,0,jobGetCompilationTime},
-  {'S','m',PRODUCTION,NOPARAMETER,0,jobGetFreeMemory},
+  cmultiStandardCommands,
   {'R','g',CUSTOMER,NOPARAMETER,0,jobGetRandom},      // JOB_GET_RANDOM
   {'R','n',CUSTOMER,NOPARAMETER,0,jobNewRandom},      // JOB_NEW_RANDOM
   {'D','c',CUSTOMER,NOPARAMETER,0,jobClearAutoDoor},  // JOB_AUTO_DOOR_OFF
@@ -50,11 +26,9 @@ COMMAND knetCommands[NUM_KZG_COMMANDS] =
   {'D','t',CUSTOMER,BYTEARRAY,16,jobTryInfo},             // JOB_TRY_INFO
   {'C','t',CUSTOMER,BYTEARRAY,4,jobTryCode},             // JOB_TRY_CODE
   {'P','t',CUSTOMER,NOPARAMETER,0,jobPirTrigger},         //
-  {'L','N',CUSTOMER,NOPARAMETER,0,jobNextLichtStatus},    // JOB_RESET			'R'
-  {'M','A',PRODUCTION,STRING,16,setBootloaderAttention},    //JOB_BL_ATTENTION
-  {'M','B',PRODUCTION,NOPARAMETER,0,startBootloader},    // JOB_BL_START		'B'
-  {'M','T',CUSTOMER,NOPARAMETER,0,NULL},
-  {'M','t',CUSTOMER,NOPARAMETER,0,NULL},
+  {'L','N',CUSTOMER,NOPARAMETER,0,jobNextLichtStatus},
+  {'C','f',CUSTOMER,NOPARAMETER,0,jobfoundCard},         // JOB_GET_INFO
+  {'C','i',CUSTOMER,BYTEARRAY,INFO_LENGTH,jobGotCardInfo},         // JOB_GET_INFO
 };
 
 #define NUM_KZG_INFORMATION 1
@@ -65,6 +39,42 @@ INFORMATION knetInformation[NUM_KZG_INFORMATION]=
 };
 
 ComReceiver knetCom(&kmulti,Node, knetCommands,NUM_KZG_COMMANDS, knetInformation,NUM_KZG_INFORMATION,NULL,NULL);
+
+
+void jobGotCardInfo(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+uint8_t i;
+  uint8_t keynum = (uint8_t) address - '0';
+  uint8_t *info = (uint8_t*) pMem;
+  bool valid = true;
+
+  for (i=0;i<INFO_LENGTH;i++)
+  {
+    if( info[i] != eeprom_read_byte(&InfoList[keynum][i]) )
+    {
+      valid = false;
+      break;
+    }
+  }
+  open_door(valid);
+}
+
+
+void jobfoundCard(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+uint8_t tosend[KEY_LENGTH],i;
+
+  uint8_t keynum = (uint8_t) address - '0';
+	if (keynum<KEY_NUM)
+	{
+		for (i=0;i<KEY_LENGTH;i++)
+		{
+			tosend[i] = eeprom_read_byte(&KeyList[keynum][i]);
+		}
+    comRec->Getoutput()->sendStandardByteArray(tosend,KEY_LENGTH,Bedienung,'C',address,'k','T');
+  }
+
+}
 
 
 void jobNextLichtStatus(ComReceiver *comRec, char function,char address,char job, void * pMem)

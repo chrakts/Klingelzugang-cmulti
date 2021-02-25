@@ -48,6 +48,8 @@
 //enum {ERROR_SPEICHER=0,ERROR_PARAMETER,ERROR_NO_SMS,ERROR_HANDY,ERROR_COM_HANDY,ERROR_JOB,ERROR_TRANSMISSION};
 //enum{ RCST_WAIT=0,RCST_ATTENTION,RCST_WAIT_NODE,RCST_WAIT_FUNCTION,RCST_WAIT_JOB,RCST_DO_JOB,RCST_WAIT_END1,RCST_WAIT_END2,RCST_GET_PARAMETER};
 
+void jobfoundCard(ComReceiver *comRec, char function,char address,char job, void * pMem);
+void jobGotCardInfo(ComReceiver *comRec, char function,char address,char job, void * pMem);
 
 void jobNextLichtStatus(ComReceiver *comRec, char function,char address,char job, void * pMem);
 void jobPirTrigger(ComReceiver *comRec, char function,char address,char job, void * pMem);
