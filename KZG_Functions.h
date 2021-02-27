@@ -9,10 +9,9 @@
 #ifndef KZG_FUNCTIONS_H_
 #define KZG_FUNCTIONS_H_
 
-#include "Serial.h"
+#include "Communication.h"
 #include "ComReceiver.h"
-
-#define NODE			'Z'
+#include "cmultiStandardCommands.h"
 
 #define FUNCTION_RANDOM	'R'
 #define JOB_NEW_RANDOM	'N'
@@ -45,8 +44,12 @@
 #define GET_NUM_LENGTH		3
 #define WRITE_CODE_LENGTH	8
 
-//enum {ERROR_SPEICHER=0,ERROR_PARAMETER,ERROR_NO_SMS,ERROR_HANDY,ERROR_COM_HANDY,ERROR_JOB,ERROR_TRANSMISSION};
-//enum{ RCST_WAIT=0,RCST_ATTENTION,RCST_WAIT_NODE,RCST_WAIT_FUNCTION,RCST_WAIT_JOB,RCST_DO_JOB,RCST_WAIT_END1,RCST_WAIT_END2,RCST_GET_PARAMETER};
+
+#define NUM_KZG_COMMANDS 13+CMULTI_STANDARD_NUM
+#define NUM_KZG_INFORMATION 1
+
+extern COMMAND knetCommands[NUM_KZG_COMMANDS];
+extern INFORMATION knetInformation[NUM_KZG_INFORMATION];
 
 void jobfoundCard(ComReceiver *comRec, char function,char address,char job, void * pMem);
 void jobGotCardInfo(ComReceiver *comRec, char function,char address,char job, void * pMem);

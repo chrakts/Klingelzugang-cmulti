@@ -11,8 +11,6 @@
 #include "Externals.h"
 #include "../Secrets/secrets.h"
 
-#define NUM_KZG_COMMANDS 13+CMULTI_STANDARD_NUM
-
 COMMAND knetCommands[NUM_KZG_COMMANDS] =
 {
   cmultiStandardCommands,
@@ -30,8 +28,6 @@ COMMAND knetCommands[NUM_KZG_COMMANDS] =
   {'C','f',CUSTOMER,NOPARAMETER,0,jobfoundCard},         // JOB_GET_INFO
   {'C','i',CUSTOMER,BYTEARRAY,INFO_LENGTH,jobGotCardInfo},         // JOB_GET_INFO
 };
-
-#define NUM_KZG_INFORMATION 1
 
 INFORMATION knetInformation[NUM_KZG_INFORMATION]=
 {
@@ -57,6 +53,7 @@ uint8_t i;
     }
   }
   open_door(valid);
+  comRec->Getoutput()->sendCommand(Bedienung,'C',address,'r'); // release Card
 }
 
 
