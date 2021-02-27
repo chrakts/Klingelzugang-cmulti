@@ -26,8 +26,6 @@ uint8_t	i=5;
 
 void sendSignalLamps()
 {
-uint8_t i;
-
   switch(inputStatus)
   {
     case INPUT_BLOCKED:
