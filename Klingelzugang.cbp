@@ -30,7 +30,7 @@
 					<Variable name="MCU" value="atxmega32a4u" />
 				</Environment>
 			</Target>
-			<Target title="Plug">
+			<Target title="Plug128">
 				<Option output="bin/Release/Klingelzugang.elf" prefix_auto="1" extension_auto="0" />
 				<Option working_dir="" />
 				<Option object_output="obj/Release/" />
@@ -52,6 +52,30 @@
 				</Linker>
 				<Environment>
 					<Variable name="MCU" value="atxmega128a4u" />
+				</Environment>
+			</Target>
+			<Target title="Plug32">
+				<Option output="bin/Release/Klingelzugang.elf" prefix_auto="1" extension_auto="0" />
+				<Option working_dir="" />
+				<Option object_output="obj/Release/" />
+				<Option type="5" />
+				<Option compiler="avr-gcc" />
+				<Compiler>
+					<Add option="-fomit-frame-pointer" />
+					<Add option="-O" />
+					<Add option="-Wall" />
+					<Add option="-std=c++11" />
+					<Add option="-mmcu=atxmega32a4u" />
+					<Add option="-DPLUG_BUILT" />
+					<Add option="-DMCU=atxmega32a4u" />
+					<Add directory="/home/chrak/Downloads/avr8-gnu-toolchain-linux_x86_64/avr/lib/avrxmega2" />
+					<Add directory="/home/chrak/Downloads/avr8-gnu-toolchain-linux_x86_64/avr/include" />
+				</Compiler>
+				<Linker>
+					<Add option="-mmcu=atxmega32a4u" />
+				</Linker>
+				<Environment>
+					<Variable name="MCU" value="atxmega32a4u" />
 				</Environment>
 			</Target>
 		</Build>
@@ -102,8 +126,6 @@
 		<Unit filename="../Secrets/secrets.h" />
 		<Unit filename="../communication/CRC_Calc.cpp" />
 		<Unit filename="../communication/CRC_Calc.h" />
-		<Unit filename="../communication/Cmulti2Buffer.h" />
-		<Unit filename="../communication/CmultiBusy.h" />
 		<Unit filename="../communication/Communication.cpp" />
 		<Unit filename="../communication/Communication.h" />
 		<Unit filename="../communication/Serial.cpp" />
@@ -147,6 +169,7 @@
 		<Unit filename="myConstants.h" />
 		<Unit filename="myTimers.cpp" />
 		<Unit filename="myTimers.h" />
+		<Unit filename="report.h" />
 		<Unit filename="signalLamps.cpp" />
 		<Unit filename="signalLamps.h" />
 		<Unit filename="uartHardware.h" />
