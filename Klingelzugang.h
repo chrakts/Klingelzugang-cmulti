@@ -20,7 +20,6 @@
 #include <avr/pgmspace.h>
 #include <avr/interrupt.h>
 #include <stdlib.h>
-#include "UART.h"
 #include "CRC_Calc.h"
 #include "myTimers.h"
 #include "KZG_Functions.h"
@@ -40,12 +39,12 @@
 #include "myConstants.h"
 #include "xmegaClocks.h"
 #include "xmegaClocks.h"
-#include "Cmulti2Buffer.h"
+//#include "Cmulti2Buffer.h"
 #include "Communication.h"
 #include "ComReceiver.h"
 #include "CNET_Functions.h"
-#include "Serial.h"
-#include "uartHardware.h"
+
+#include "ledHardware.h"
 #include "Licht.h"
 #include "codeInput.h"
 #include "door.h"
@@ -57,25 +56,16 @@
 #define Line MakeString( Stringize, __LINE__ )
 #define Reminder __FILE__ "(" Line ") : Reminder: "
 
+enum{CNET=0,KNET};
 
 
 typedef struct Timer TIMER;
-
-//enum {ERROR_SPEICHER=0,ERROR_PARAMETER,ERROR_NO_SMS,ERROR_HANDY,ERROR_COM_HANDY,ERROR_JOB,ERROR_TRANSMISSION};
-//enum{ RCST_WAIT=0,RCST_ATTENTION,RCST_WAIT_NODE,RCST_WAIT_FUNCTION,RCST_WAIT_JOB,RCST_DO_JOB,RCST_WAIT_END1,RCST_WAIT_END2,RCST_GET_PARAMETER};
 
 #define WDT_SHORT		WDT_PER_1KCLK_gc
 #define WDT_LONG		WDT_PER_8KCLK_gc
 
 
 #ifdef MAIN_BUILT
-
-#define LEDROT_PORT   PORTA
-#define LEDROT_PIN    PIN2_bm
-#define LEDGRUEN_PORT PORTA
-#define LEDGRUEN_PIN  PIN4_bm
-#define LEDGELB_PORT  PORTA
-#define LEDGELB_PIN   PIN3_bm
 
 #define KLINGEL_PORT    PORTE
 #define KLINGEL1_PIN		PIN1_bm
@@ -132,15 +122,6 @@ typedef struct Timer TIMER;
 
 #ifdef PLUG_BUILT
 
-/* LED auf Basisplatine */
-
-#define LEDROT_PORT   PORTA
-#define LEDROT_PIN    PIN2_bm
-#define LEDGRUEN_PORT PORTA
-#define LEDGRUEN_PIN  PIN3_bm
-#define LEDGELB_PORT  PORTA
-#define LEDGELB_PIN   PIN4_bm
-
 #define KLINGEL_PORT    PORTA
 #define KLINGEL1_PIN		PIN5_bm
 #define KLINGEL0_PIN		PIN6_bm
@@ -150,28 +131,13 @@ typedef struct Timer TIMER;
 #define OEFFNER_PIN_H	PIN1_bm
 
 #define TASTER_PORT_C    C
-#define TASTER_INPUT_C   5
+#define TASTER_INPUT_C   7
 #define TASTER_INT_NUM_C 0
-#define TASTER_LED			 PIN4_bm
+#define TASTER_LED			 PIN6_bm
 
 
 #endif // PLUG_BUILT
 
-
-#define LEDROTSETUP     LEDROT_PORT.DIRSET=LEDROT_PIN
-#define LEDROT_ON       LEDROT_PORT.OUTCLR=LEDROT_PIN
-#define LEDROT_OFF      LEDROT_PORT.OUTSET=LEDROT_PIN
-#define LEDROT_TOGGLE   LEDROT_PORT.OUTTGL=LEDROT_PIN
-
-#define LEDGRUENSETUP     LEDGRUEN_PORT.DIRSET=LEDGRUEN_PIN
-#define LEDGRUEN_ON       LEDGRUEN_PORT.OUTCLR=LEDGRUEN_PIN
-#define LEDGRUEN_OFF      LEDGRUEN_PORT.OUTSET=LEDGRUEN_PIN
-#define LEDGRUEN_TOGGLE   LEDGRUEN_PORT.OUTTGL=LEDGRUEN_PIN
-
-#define LEDGELBSETUP    LEDGELB_PORT.DIRSET=LEDGELB_PIN
-#define LEDGELB_ON      LEDGELB_PORT.OUTCLR=LEDGELB_PIN
-#define LEDGELB_OFF     LEDGELB_PORT.OUTSET=LEDGELB_PIN
-#define LEDGELB_TOGGLE  LEDGELB_PORT.OUTTGL=LEDGELB_PIN
 
 #define KLINGEL0_START				KLINGEL_PORT.OUTSET=KLINGEL0_PIN
 #define KLINGEL1_START				KLINGEL_PORT.OUTSET=KLINGEL1_PIN
@@ -191,7 +157,6 @@ typedef struct Timer TIMER;
 #define TASTERLED_TOGGLE   TASTER_PORT.OUTTGL=TASTER_LED
 #define TASTERINPUTSETUP   TASTER_PORT.DIRCLR=TASTER_INPUT
 #define TASTER_INT_VEC     JOIN5( PORT,TASTER_PORT_C,_INT,TASTER_INT_NUM_C,_vect ) //PORTx_INTx_vect
-#pragma message "Taster-Interrupt: " XSTR(TASTER_INT_VEC)
 
 void init_io();
 void broadcastOpenDoorStatus();

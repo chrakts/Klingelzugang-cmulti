@@ -6,8 +6,7 @@
  */
 
 #include "Klingelzugang.h"
-
-typedef enum test{_A=17,_B=18,_C=19}TEST;
+#include "report.h"
 
 void init_io()
 {
@@ -34,7 +33,7 @@ void init_io()
 
 	PORTB_DIRSET = 0xff;
 
-	PORTC_DIRSET = PIN0_bm | PIN4_bm| PIN3_bm;
+	PORTC_DIRSET = PIN0_bm | PIN3_bm | PIN4_bm | PIN5_bm;
 
 	PORTD_DIRSET = PIN0_bm | PIN1_bm | PIN3_bm | PIN4_bm | PIN5_bm | PIN7_bm;
 	PORTD_DIRCLR = PIN2_bm | PIN6_bm;
@@ -52,11 +51,11 @@ void init_io()
 	}
   LEDGRUEN_OFF;
 
-	PMIC_CTRL = PMIC_LOLVLEX_bm | PMIC_HILVLEN_bm | PMIC_MEDLVLEN_bm;
-	sei();
 
 	cmulti.open(Serial::BAUD_57600,F_CPU);
 	kmulti.open(Serial::BAUD_57600,F_CPU);
+	PMIC_CTRL = PMIC_LOLVLEX_bm | PMIC_HILVLEN_bm | PMIC_MEDLVLEN_bm;
+	sei();
 
 }
 
@@ -64,14 +63,17 @@ void init_io()
 int main(void)
 {
 	init_io();
+  kmulti.broadcastString("Hallo",'X','Y','Z');
 
 	cmulti.broadcastUInt8((uint8_t) RST.STATUS,'S','0','R');
 
-  cmulti.encryptSetKey(key);
+
+  //cmulti.encryptSetKey(key);
   //kmulti.encryptSetKey(key);
 
 	init_mytimer();
 	init_klingel();
+  while(1);
 	//WDT_EnableAndSetTimeout(WDT_SHORT);
 
 	WDT_Reset();
@@ -79,6 +81,9 @@ int main(void)
 
   //broadcastOpenDoorStatus();
   cmulti.broadcastString("Hallo",'X','Y','Z');
+  _delay_ms(2000);
+  kmulti.broadcastString("Hallo",'1','1','1');
+  cmulti.sendInfo("Hallo","Kg");
   WS_init();
   //PORT_t *myp;
 	//myp = &PORTE;
