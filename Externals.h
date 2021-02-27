@@ -14,6 +14,7 @@
 #include "Klingelzugang.h"
 #include "ComReceiver.h"
 #include "CNET_Functions.h"
+#include "KZG_Functions.h"
 #include "RandomTimer.h"
 #include "encrypt.hpp"
 
