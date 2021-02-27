@@ -64,7 +64,7 @@
 #define     WS_EVSYS_CH     0           // Eventchannel to use
 #define     WS_WGMODE       0x03        // WGMODE_SS
 
-#define     WS_OUTPIN 4         // output pin
+#define     WS_OUTPIN 7         // output pin
 #define     WS_C_PORT
 
 #if WS_OUTPIN == 0
