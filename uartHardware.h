@@ -9,8 +9,6 @@
 #define JOIN4(W,X,Y,Z) JOIN4_(W,X,Y,Z)
 #define JOIN5_(V,W,X,Y,Z) V##W##X##Y##Z
 #define JOIN5(V,W,X,Y,Z) JOIN5_(V,W,X,Y,Z)
-#define XSTR(x) STR(x)
-#define STR(x) #x
 
 #define EOL "\n\r"
 
@@ -79,7 +77,6 @@
 #define Busy_Control_Port_0    SERIAL_PORT_0
 #define Busy_Control_IntVec_0  JOIN3(PORT,UART_PORT_0,_INT0_vect)
 #define Busy_Control_TimVec_0  JOIN4(TC,BUSY_TIMER_PORT,2,_LUNF_vect)
-#pragma message "UART0-Busy-Interrupt: " XSTR(Busy_Control_IntVec_0)
 
 //#define Busy_Control_Pin     PIN2_bm
 //#define Busy_Control_PinCtrl PIN2CTRL
@@ -90,13 +87,13 @@
 
 /* ###################### Zweiter UART ############################ */
 #define  USE_RS485_1   // kmulti
-#undef  USE_RS485_FEEDBACK_1
-#define  USE_BUSY_1 false
+#define  USE_RS485_FEEDBACK_1
+#define  USE_BUSY_1 true
 
 #define UART_PORT_1 C
 #define UART_NUM_1  0
-#define TE_PIN_1    0
-#define RE_PIN_1    1
+#define TE_PIN_1    5
+#define RE_PIN_1    4
 #define TX_PIN_1    3
 #define RX_PIN_1    2
 
@@ -106,7 +103,7 @@
 
 /* ###################### Busy-Timer  ############################ */
 // Dieser Timer wird dann für beide Ports verwendet (Timer2 L/H -> belegt damit auch Timer 1!)
-#define BUSY_TIMER_PORT D
+#define BUSY_TIMER_PORT C
 /* ###################### ########### ############################ */
 
 /* ----------------- automatische für Busy-Timer ---------------------- */
@@ -148,15 +145,9 @@
 #define Busy_Control_Port_1    SERIAL_PORT_1
 #define Busy_Control_IntVec_1  JOIN3(PORT,UART_PORT_1,_INT1_vect)
 #define Busy_Control_TimVec_1  JOIN4(TC,BUSY_TIMER_PORT,2,_HUNF_vect)
-#pragma message "UART1-Busy-Interrupt: " XSTR(Busy_Control_IntVec_1)
 
 
 #define UART0_RING_BUFFER_SIZE 50
 #define UART1_RING_BUFFER_SIZE 50
-
-extern volatile uint8_t UART0_ring_received;
-extern volatile  char UART0_ring_buffer[UART0_RING_BUFFER_SIZE];
-extern volatile uint8_t UART1_ring_received;
-extern volatile  char UART1_ring_buffer[UART1_RING_BUFFER_SIZE];
 
 #endif // UARTHARDWARE_H_INCLUDED
