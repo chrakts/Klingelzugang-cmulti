@@ -8,7 +8,7 @@ volatile uint8_t iLichtGrossActual = 0;
 volatile float fHelligkeit=300;
 volatile uint16_t iLichtgrenzwert=200,iLichtwertHysterese=50;
 
-const char *LichtStatus[]={"aus","ein","Auto"};
+const char *LichtStatus[]={"aus","ein","Auto","PIR"};
 
 void updateLicht(uint8_t setStatus,char adr)
 {
@@ -33,6 +33,9 @@ uint8_t oldStatus;
     case LICHT_SET_AUTO:
       iLichtKleinActual = calcHysterese(oldStatus);
     break;
+    case LICHT_SET_PIR:
+      iLichtKleinActual = calcPIR();
+    break;
   }
   if( iLichtKleinActual!=oldStatus)
     cmulti.broadcastUInt8(iLichtKleinActual,'L','1','a');         // send actual status
@@ -48,6 +51,9 @@ uint8_t oldStatus;
     break;
     case LICHT_SET_AUTO:
       iLichtGrossActual = calcHysterese(oldStatus);
+    break;
+    case LICHT_SET_PIR:
+      iLichtKleinActual = calcPIR();
     break;
   }
   if( iLichtGrossActual!=oldStatus)
@@ -67,6 +73,14 @@ uint8_t calcHysterese(uint8_t oldValue)
       return(LICHT_SET_EIN);
   }
   return( oldValue );
+}
+
+uint8_t calcPIR()
+{
+  if( (inputStatus!=INPUT_SLEEP) && (fHelligkeit<(float)iLichtgrenzwert) )
+    return(LICHT_SET_AUS);
+  else
+    return(LICHT_SET_EIN);
 }
 
 void lightToggle(ComReceiver *comRec, char function,char address,char job, void * pMem)
@@ -104,6 +118,9 @@ uint8_t status;
     break;
     case 'A':
       status = LICHT_SET_AUTO;
+    break;
+    case 'P':
+      status = LICHT_SET_PIR;
     break;
     default:
       status = LICHT_SET_UNVALID;
