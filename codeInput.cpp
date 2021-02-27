@@ -4,7 +4,7 @@ volatile uint8_t inputStatus=NO_INPUT;
 volatile char testCode[7];
 volatile uint8_t testCodePointer = 0;
 volatile uint8_t BlockingStatus = UNBLOCKED;
-uint16_t BlockadeZeiten[BLOCKED_LAST] = {250,1000,1000,3000,5000,15000,60000};
+uint16_t BlockadeZeiten[BLOCKED_LAST] = {50,200,400,600,1000,2000,6000};
 
 
 void numberPressed(ComReceiver *comRec, char function,char address,char job, void * pMem)

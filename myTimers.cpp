@@ -50,7 +50,7 @@ void Stop_Ring_Bel(uint8_t test)
 
 void goto_sleep(uint8_t test)
 {
-  if(inputStatus != INPUT_BLOCKED)
+  if( (inputStatus>INPUT_BLOCKED) || (inputStatus<INPUT_BLOCKED1) )
   {
     do_sleep = 1;
     inputStatus = INPUT_SLEEP;
@@ -63,6 +63,14 @@ void goto_sleep(uint8_t test)
 void BlockingEnde(uint8_t test)
 {
   //BlockingStatus = UNBLOCKED;
-  inputStatus = NO_INPUT;
-  MyTimers[TIMER_BLOCKING_END].state = TM_STOP;
+  if(inputStatus==INPUT_BLOCKED1)
+  {
+    inputStatus = NO_INPUT;
+    MyTimers[TIMER_BLOCKING_END].state = TM_STOP;
+  }
+  else
+  {
+    inputStatus--;
+    MyTimers[TIMER_BLOCKING_END].state = TM_START;
+  }
 }
