@@ -1,7 +1,14 @@
 #ifndef CODEINPUT_H_INCLUDED
 #define CODEINPUT_H_INCLUDED
 
-#include "Klingelzugang.h"
+#include <avr/io.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <avr/pgmspace.h>
+#include <avr/interrupt.h>
+#include <stdlib.h>
+#include "Externals.h"
 
 extern volatile uint8_t inputStatus;
 extern volatile uint8_t BlockingStatus;
@@ -12,8 +19,8 @@ enum{UNBLOCKED=0,BLOCKED0,BLOCKED1,BLOCKED2,BLOCKED3,BLOCKED4,BLOCKED5,BLOCKED_L
 
 void numberPressed(ComReceiver *comRec, char function,char address,char job, void * pMem);
 void specialPressed(ComReceiver *comRec, char function,char address,char job, void * pMem);
-uint8_t checkCodeInput(char *toTest);
-uint8_t checkSpecialCodeInput(char *toTest);
+uint8_t checkCodeInput(volatile char *toTest);
+uint8_t checkSpecialCodeInput(volatile char *toTest);
 void make_blocking(uint8_t reset);
 
 #endif // CODEINPUT_H_INCLUDED

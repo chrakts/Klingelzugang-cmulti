@@ -82,7 +82,7 @@ void make_blocking(uint8_t reset)
   }
 }
 
-uint8_t checkCodeInput(char *toTest)
+uint8_t checkCodeInput(volatile char *toTest)
 {
 bool right;
 uint8_t i,j;
@@ -105,7 +105,7 @@ uint8_t i,j;
   return( right );
 }
 
-uint8_t checkSpecialCodeInput(char *toTest)
+uint8_t checkSpecialCodeInput(volatile char *toTest)
 {
 bool right;
 uint8_t i,j;
