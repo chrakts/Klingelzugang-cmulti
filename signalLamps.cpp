@@ -31,6 +31,26 @@ void sendSignalLamps()
     case INPUT_BLOCKED:
       fillColor(0,6,C_ROT);
     break;
+    case INPUT_BLOCKED5:
+      fillColor(0,5,C_ROT);
+      fillColor(5,6,C_GRUEN);
+    break;
+    case INPUT_BLOCKED4:
+      fillColor(0,4,C_ROT);
+      fillColor(4,6,C_GRUEN);
+    break;
+    case INPUT_BLOCKED3:
+      fillColor(0,3,C_ROT);
+      fillColor(3,6,C_GRUEN);
+    break;
+    case INPUT_BLOCKED2:
+      fillColor(0,2,C_ROT);
+      fillColor(2,6,C_GRUEN);
+    break;
+    case INPUT_BLOCKED1:
+      fillColor(0,1,C_ROT);
+      fillColor(1,6,C_GRUEN);
+    break;
     case INPUT_SLEEP:
       fillColor(0,6,C_LILA);
     break;
@@ -99,6 +119,9 @@ void sendSignalLamps()
     case LICHT_SET_AUTO:
       signalStatus[6]= C_BLAU;
     break;
+    case LICHT_SET_PIR:
+      signalStatus[6]= C_TUERKIS;
+    break;
   }
   switch(iLichtKleinSet)
   {
@@ -111,6 +134,9 @@ void sendSignalLamps()
     case LICHT_SET_AUTO:
       signalStatus[7]= C_BLAU;
     break;
+    case LICHT_SET_PIR:
+      signalStatus[7]= C_TUERKIS;
+    break;
   }
   signalStatus[8] = C_SCHWARZ;
   if(auto_door_status==true)
@@ -122,7 +148,7 @@ void sendSignalLamps()
   signalStatus[12] = 0;
   if(strcmp(signalStatusOld,signalStatus)!=0)
   {
-    cmulti.broadcastString(signalStatus,'S','1','s');
+    kmulti.broadcastString(signalStatus,'S','1','s');
     strcpy(signalStatusOld,signalStatus);
   }
 }
