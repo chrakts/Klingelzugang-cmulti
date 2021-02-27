@@ -53,7 +53,7 @@ uint8_t oldStatus;
       iLichtGrossActual = calcHysterese(oldStatus);
     break;
     case LICHT_SET_PIR:
-      iLichtKleinActual = calcPIR();
+      iLichtGrossActual = calcPIR();
     break;
   }
   if( iLichtGrossActual!=oldStatus)
