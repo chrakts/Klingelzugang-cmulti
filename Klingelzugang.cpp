@@ -63,7 +63,7 @@ void init_io()
 int main(void)
 {
 	init_io();
-  kmulti.broadcastString("Hallo",'X','Y','Z');
+  kmulti.broadcastString("JJJJJ",'X','Y','Z');
 
 	cmulti.broadcastUInt8((uint8_t) RST.STATUS,'S','0','R');
 
@@ -73,7 +73,7 @@ int main(void)
 
 	init_mytimer();
 	init_klingel();
-  while(1);
+
 	//WDT_EnableAndSetTimeout(WDT_SHORT);
 
 	WDT_Reset();
@@ -81,30 +81,17 @@ int main(void)
 
   //broadcastOpenDoorStatus();
   cmulti.broadcastString("Hallo",'X','Y','Z');
-  _delay_ms(2000);
-  kmulti.broadcastString("Hallo",'1','1','1');
+  kmulti.broadcastString("kkkkkk",'1','1','1');
   cmulti.sendInfo("Hallo","Kg");
-  WS_init();
-  //PORT_t *myp;
-	//myp = &PORTE;
-	//myp->REMAP = 1;
+
   uint8_t led_loc[12];
   uint8_t t;
   for(t=0;t<12;t++)
     led_loc[t] = 0x55;
 	do
 	{
-		//rec_KNET();
-		//knetCom.comStateMachine();
-    //knetCom.doJob();
-    while (WS_out(led_loc,12,NULL)!=0)
-    {
-      LEDGRUEN_TOGGLE;
-      _delay_us(300);
-      LEDGRUEN_TOGGLE;
-      _delay_us(300);
-    }
-
+    knetCom.comStateMachine();
+    knetCom.doJob();
 		cnetCom.comStateMachine();
     cnetCom.doJob();
 
