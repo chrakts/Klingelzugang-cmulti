@@ -45,7 +45,6 @@ void jobPir(ComReceiver *comRec, char function,char address,char job, void * pMe
 void mailPressed(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
   wakeup();
-
 }
 
 void gotNewBrightness()
