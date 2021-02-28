@@ -18,7 +18,6 @@ void open_door(uint8_t open)
 	}
 	else
 	{
-		//send_answer(KNET,"niO",false);
 		MyTimers[TIMER_ROT_TOGGLE].state = TM_START;
 	}
 }
@@ -37,5 +36,10 @@ void doorToggle(ComReceiver *comRec, char function,char address,char job, void *
       open_door(auto_door_status);
     }
   }
+}
+
+void broadcastOpenDoorStatus()
+{
+  cmulti.broadcastUInt8(auto_door_status,'D','0','S');
 }
 
