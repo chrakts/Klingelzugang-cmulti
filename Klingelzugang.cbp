@@ -172,6 +172,8 @@
 		<Unit filename="report.h" />
 		<Unit filename="signalLamps.cpp" />
 		<Unit filename="signalLamps.h" />
+		<Unit filename="stromMessung.cpp" />
+		<Unit filename="stromMessung.h" />
 		<Unit filename="uartHardware.h" />
 		<Unit filename="ws2812Hardware.h" />
 		<Extensions />

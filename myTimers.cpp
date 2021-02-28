@@ -8,15 +8,28 @@
 #include "Klingelzugang.h"
 
 volatile TIMER MyTimers[MYTIMER_NUM]=	{	{TM_STOP,RESTART_NO,100,0,Beeper_Ready},
-											{TM_STOP,RESTART_NO,100,0,NULL},
+											{TM_START,RESTART_YES,100,0,nextReport},
 											{TM_STOP,RESTART_NO,125,0,LED_toggle},
 											{TM_START,RESTART_NO,1200,0,goto_sleep},
 											{TM_STOP,RESTART_NO,250,0,Stop_Open_Door},
 											{TM_STOP,RESTART_NO,600,0,Stop_Ring_Bel},
 											{TM_STOP,RESTART_YES,20,0,LED_rot_toggle},
-                      {TM_STOP,RESTART_NO,250,0,BlockingEnde}	// Blockade nach falscher Eingabe
+                      {TM_STOP,RESTART_NO,250,0,BlockingEnde},	// Blockade nach falscher Eingabe
+                      {TM_START,RESTART_YES,1,0,makeAdcMeasure}
 
 };
+
+
+
+void makeAdcMeasure(uint8_t test)
+{
+  startMeasure();
+}
+
+void nextReport(uint8_t test)
+{
+  doNextReport=true;
+}
 
 void Beeper_Ready(uint8_t test)
 {
