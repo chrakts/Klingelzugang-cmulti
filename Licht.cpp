@@ -12,9 +12,25 @@ const char *LichtStatus[]={"aus","ein","Auto","PIR"};
 
 void updateLicht(uint8_t setStatus,char adr)
 {
-  cmulti.broadcastString(LichtStatus[setStatus],'L',adr,'s');  // send set status
+  broadcastLichtSetStatus(adr);     // send set status
   calcAndSendLichtActualStatus();
   sendSignalLamps();
+}
+
+void broadcastLichtSetStatus(char adr)
+{
+  if(adr=='1')
+    cmulti.broadcastString(LichtStatus[iLichtKleinSet],'L',adr,'s');
+  else
+    cmulti.broadcastString(LichtStatus[iLichtGrossSet],'L',adr,'s');
+}
+
+void broadcastLichtActualStatus(char adr)
+{
+  if(adr=='1')
+    cmulti.broadcastUInt8(iLichtKleinActual,'L',adr,'a');         // send actual status
+  else
+    cmulti.broadcastUInt8(iLichtGrossActual,'L',adr,'a');         // send actual status
 }
 
 void calcAndSendLichtActualStatus()
@@ -38,7 +54,7 @@ uint8_t oldStatus;
     break;
   }
   if( iLichtKleinActual!=oldStatus)
-    cmulti.broadcastUInt8(iLichtKleinActual,'L','1','a');         // send actual status
+   broadcastLichtActualStatus('1');         // send actual status
 
   oldStatus = iLichtGrossActual;
   switch(iLichtGrossSet)
@@ -57,7 +73,7 @@ uint8_t oldStatus;
     break;
   }
   if( iLichtGrossActual!=oldStatus)
-    cmulti.broadcastUInt8(iLichtGrossActual,'L','2','a');         // send actual status
+    broadcastLichtActualStatus('2');         // send actual status
 }
 
 uint8_t calcHysterese(uint8_t oldValue)
