@@ -18,13 +18,16 @@
 #include "RandomTimer.h"
 #include "encrypt.hpp"
 
+enum{REPORT_FIRST,REPORT_LICHTKLEINACTUAL,REPORT_LICHTKLEINSET,REPORT_LICHTGROSSACTUAL,REPORT_LICHTGROSSSET,REPORT_LICHTGRENZWERT,REPORT_LICHTHYSTERESE,REPORT_DOOROPENSTATUS,REPORT_LAST};
 
 extern const char *Node;
 extern const char *Bedienung;
 
+extern volatile bool doNextReport;
+extern volatile uint8_t toReport;
+
+
 extern RandomTimer my_random_timer;
-
-
 
 extern uint8_t key[16];
 extern Encrypt encrypt;
