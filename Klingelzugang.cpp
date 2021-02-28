@@ -50,24 +50,20 @@ void init_io()
 		_delay_ms(50);
 	}
   LEDGRUEN_OFF;
-
+  initTemperatureMessung();
 
 	cmulti.open(Serial::BAUD_57600,F_CPU);
 	kmulti.open(Serial::BAUD_57600,F_CPU);
 	PMIC_CTRL = PMIC_LOLVLEX_bm | PMIC_HILVLEN_bm | PMIC_MEDLVLEN_bm;
 	sei();
-
+  startMeasure();
 }
 
 
 int main(void)
 {
 	init_io();
-  kmulti.broadcastString("JJJJJ",'X','Y','Z');
-
-	cmulti.broadcastUInt8((uint8_t) RST.STATUS,'S','0','R');
-
-
+  cmulti.broadcastUInt8((uint8_t) RST.STATUS,'S','0','R');
   //cmulti.encryptSetKey(key);
   //kmulti.encryptSetKey(key);
 
@@ -77,17 +73,11 @@ int main(void)
 	//WDT_EnableAndSetTimeout(WDT_SHORT);
 
 	WDT_Reset();
-	//kmulti.sendInfo("Klingel zur Bedienung Neu","BR");
 
-  //broadcastOpenDoorStatus();
-  cmulti.broadcastString("Hallo",'X','Y','Z');
-  kmulti.broadcastString("kkkkkk",'1','1','1');
-  cmulti.sendInfo("Hallo","Kg");
-
-  uint8_t led_loc[12];
-  uint8_t t;
-  for(t=0;t<12;t++)
-    led_loc[t] = 0x55;
+  kmulti.sendInfo("Hallo an Bedienung","PP");
+  cmulti.broadcastUInt8((uint8_t) RST.STATUS,'S','0','R');
+  cmulti.broadcastString("Hallo an CNET",'H','h','h');
+  MyTimers[TIMER_NEXT_REPORT].state = TM_START;
 	do
 	{
     knetCom.comStateMachine();
@@ -96,9 +86,47 @@ int main(void)
     cnetCom.doJob();
 
     sendSignalLamps();
+    doReport();
 		WDT_Reset();
 
 	} while (1);
+}
+
+void doReport()
+{
+  if(doNextReport)
+  {
+    toReport++;
+    switch(toReport)
+    {
+      case REPORT_LICHTKLEINACTUAL:
+        broadcastLichtActualStatus('1');
+      break;
+      case REPORT_LICHTKLEINSET:
+        broadcastLichtSetStatus('1');
+      break;
+      case REPORT_LICHTGROSSACTUAL:
+        broadcastLichtActualStatus('2');
+      break;
+      case REPORT_LICHTGROSSSET:
+        broadcastLichtSetStatus('2');
+      break;
+      case REPORT_LICHTGRENZWERT:
+        cmulti.broadcastUInt16(iLichtgrenzwert,'L','g','G');
+      break;
+      case REPORT_LICHTHYSTERESE:
+        cmulti.broadcastUInt16(iLichtwertHysterese,'L','h','G');
+      break;
+      case REPORT_DOOROPENSTATUS:
+        broadcastOpenDoorStatus();
+      break;
+      case REPORT_LAST:
+        kmulti.broadcastUInt16(stromWert,'S','1','S');
+        toReport = REPORT_FIRST;
+      break;
+    }
+  }
+  doNextReport = false;
 }
 
 void wakeup()
@@ -111,9 +139,3 @@ void wakeup()
 }
 
 
-void broadcastOpenDoorStatus()
-{
-  kmulti.broadcastUInt8(auto_door_status,'D','0','S');
-#pragma message(Reminder "cmulti noch aktivieren")
-  //cmulti.broadcastUInt8(auto_door_status,'D','0','S');
-}

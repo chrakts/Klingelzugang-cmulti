@@ -50,6 +50,7 @@
 #include "door.h"
 #include "signalLamps.h"
 #include "ws2812.h"
+#include "stromMessung.h"
 
 #define Stringize( L )     #L
 #define MakeString( M, L ) M(L)
@@ -159,7 +160,8 @@ typedef struct Timer TIMER;
 #define TASTER_INT_VEC     JOIN5( PORT,TASTER_PORT_C,_INT,TASTER_INT_NUM_C,_vect ) //PORTx_INTx_vect
 
 void init_io();
-void broadcastOpenDoorStatus();
+void doReport();
+
 void wakeup();
 
 #endif /* TEST01_H_ */
