@@ -16,13 +16,11 @@
 extern COMMAND cnetCommands[];
 extern INFORMATION cnetInformation[];
 
-#define NUM_CNET_COMMANDS 10+CMULTI_STANDARD_NUM
+#define NUM_CNET_COMMANDS 9+CMULTI_STANDARD_NUM
 #define NUM_INFORMATION 1
 
 
 void jobSetLichtGrenzwerte(ComReceiver *comRec, char function,char address,char job, void * pMem);
-void jobPir(ComReceiver *comRec, char function,char address,char job, void * pMem);
-
 void mailPressed(ComReceiver *comRec, char function,char address,char job, void * pMem);
 
 void jobGetCTemperatureSensor(ComReceiver *output, char function,char address,char job, void * pMem);
