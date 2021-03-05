@@ -15,16 +15,8 @@ volatile TIMER MyTimers[MYTIMER_NUM]=	{	{TM_STOP,RESTART_NO,100,0,Beeper_Ready},
 											{TM_STOP,RESTART_NO,600,0,Stop_Ring_Bel},
 											{TM_STOP,RESTART_YES,20,0,LED_rot_toggle},
                       {TM_STOP,RESTART_NO,250,0,BlockingEnde},	// Blockade nach falscher Eingabe
-                      {TM_START,RESTART_YES,1,0,makeAdcMeasure}
-
+                      {TM_STOP,RESTART_NO,5000,0,nowSaveEEProm}
 };
-
-
-
-void makeAdcMeasure(uint8_t test)
-{
-  startMeasure();
-}
 
 void nextReport(uint8_t test)
 {
@@ -87,3 +79,4 @@ void BlockingEnde(uint8_t test)
     MyTimers[TIMER_BLOCKING_END].state = TM_START;
   }
 }
+
