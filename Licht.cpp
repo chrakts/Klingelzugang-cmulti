@@ -14,7 +14,7 @@ void updateLicht(uint8_t setStatus,char adr)
 {
   broadcastLichtSetStatus(adr);     // send set status
   calcAndSendLichtActualStatus();
-  sendSignalLamps();
+  sendSignalLamps(false);
 }
 
 void broadcastLichtSetStatus(char adr)
@@ -28,9 +28,15 @@ void broadcastLichtSetStatus(char adr)
 void broadcastLichtActualStatus(char adr)
 {
   if(adr=='1')
+  {
     cmulti.broadcastUInt8(iLichtKleinActual,'L',adr,'a');         // send actual status
+    kmulti.broadcastUInt8(iLichtKleinActual,'L',adr,'a');         // send actual status
+  }
   else
+  {
     cmulti.broadcastUInt8(iLichtGrossActual,'L',adr,'a');         // send actual status
+    kmulti.broadcastUInt8(iLichtGrossActual,'L',adr,'a');         // send actual status
+  }
 }
 
 void calcAndSendLichtActualStatus()

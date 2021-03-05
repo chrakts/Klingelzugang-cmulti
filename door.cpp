@@ -13,7 +13,7 @@ void open_door(uint8_t open)
 		OEFFNER_2;
 		MyTimers[TIMER_STOP_DOOR].value = 700;
 		MyTimers[TIMER_STOP_DOOR].state = TM_START;
-    sendSignalLamps();
+    sendSignalLamps(false);
     kmulti.broadcastString("Oeffne Tuer",'D','1','o');
 	}
 	else

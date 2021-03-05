@@ -35,7 +35,7 @@ uint8_t result;
         make_blocking(result);
       break;
     }
-    sendSignalLamps();
+    sendSignalLamps(false);
   }
 }
 
@@ -59,7 +59,7 @@ void specialPressed(ComReceiver *comRec, char function,char address,char job, vo
     }
     if(inputStatus==NO_INPUT)
       testCodePointer=0;
-    sendSignalLamps();
+    sendSignalLamps(false);
   }
 }
 
