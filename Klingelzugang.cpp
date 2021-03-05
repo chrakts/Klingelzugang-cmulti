@@ -50,13 +50,10 @@ void init_io()
 		_delay_ms(50);
 	}
   LEDGRUEN_OFF;
-  initTemperatureMessung();
-
 	cmulti.open(Serial::BAUD_57600,F_CPU);
 	kmulti.open(Serial::BAUD_57600,F_CPU);
 	PMIC_CTRL = PMIC_LOLVLEX_bm | PMIC_HILVLEN_bm | PMIC_MEDLVLEN_bm;
 	sei();
-  startMeasure();
 }
 
 
@@ -64,16 +61,13 @@ int main(void)
 {
 	init_io();
   cmulti.broadcastUInt8((uint8_t) RST.STATUS,'S','0','R');
-  //cmulti.encryptSetKey(key);
-  //kmulti.encryptSetKey(key);
-
+  readEEData();
 	init_mytimer();
 	init_klingel();
 
-	//WDT_EnableAndSetTimeout(WDT_SHORT);
+	WDT_EnableAndSetTimeout(WDT_SHORT);
 
 	WDT_Reset();
-
   kmulti.sendInfo("Hallo an Bedienung","PP");
   cmulti.broadcastUInt8((uint8_t) RST.STATUS,'S','0','R');
   cmulti.broadcastString("Hallo an CNET",'H','h','h');
@@ -84,9 +78,9 @@ int main(void)
     knetCom.doJob();
 		cnetCom.comStateMachine();
     cnetCom.doJob();
-
-    sendSignalLamps();
+    sendSignalLamps(false);
     doReport();
+    writeEEData();
 		WDT_Reset();
 
 	} while (1);
@@ -117,11 +111,16 @@ void doReport()
       case REPORT_LICHTHYSTERESE:
         cmulti.broadcastUInt16(iLichtwertHysterese,'L','h','G');
       break;
+      case REPORT_TEMPERATURZB:
+        cmulti.broadcastFloat(fTemperaturZB,'C','1','t');
+      break;
       case REPORT_DOOROPENSTATUS:
         broadcastOpenDoorStatus();
       break;
+      case REPORT_STATUSLEDS:
+        sendSignalLamps(true);
+      break;
       case REPORT_LAST:
-        kmulti.broadcastUInt16(stromWert,'S','1','S');
         toReport = REPORT_FIRST;
       break;
     }

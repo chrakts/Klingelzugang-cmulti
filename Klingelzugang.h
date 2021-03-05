@@ -49,8 +49,7 @@
 #include "codeInput.h"
 #include "door.h"
 #include "signalLamps.h"
-#include "ws2812.h"
-#include "stromMessung.h"
+#include "eepromData.h"
 
 #define Stringize( L )     #L
 #define MakeString( M, L ) M(L)

@@ -5,12 +5,13 @@
  *  Author: Christof
  */
 
-#define EXTERNALS_H_
-
 #include "Klingelzugang.h"
 
 const char *Node = "Kg";
 const char *Bedienung = "ZB";
+
+
+volatile float fTemperaturZB=15.7;
 
 RandomTimer my_random_timer(&TCC1);
 
@@ -18,7 +19,6 @@ Encrypt encrypt((uint8_t*)key);
 
 volatile uint8_t do_sleep = 0;
 
-enum{REPORT_FIRST,REPORT_LICHTKLEINACTUAL,REPORT_LICHTKLEINSET,REPORT_LICHTGROSSACTUAL,REPORT_LICHTGROSSSET,REPORT_LICHTGRENZWERT,REPORT_LICHTHYSTERESE,REPORT_DOOROPENSTATUS,REPORT_LAST};
 
 volatile bool doNextReport=false;
 volatile uint8_t toReport=REPORT_FIRST;
