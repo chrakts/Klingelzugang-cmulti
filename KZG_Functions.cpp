@@ -14,24 +14,28 @@
 COMMAND knetCommands[NUM_KZG_COMMANDS] =
 {
   cmultiStandardCommands,
+  {'T','p',CUSTOMER,NOPARAMETER,0,numberPressed},
+  {'P','p',CUSTOMER,NOPARAMETER,0,specialPressed},
+  {'L','t',CUSTOMER,NOPARAMETER,0,lightToggle},
+  {'M','p',CUSTOMER,NOPARAMETER,0,mailPressed},
+  {'D','p',CUSTOMER,NOPARAMETER,0,doorToggle},
+  {'K','r',CUSTOMER,NOPARAMETER,0,jobKlingel},
+  {'P','t',CUSTOMER,NOPARAMETER,0,jobPirTrigger},
+/*
   {'R','g',CUSTOMER,NOPARAMETER,0,jobGetRandom},      // JOB_GET_RANDOM
   {'R','n',CUSTOMER,NOPARAMETER,0,jobNewRandom},      // JOB_NEW_RANDOM
-  {'D','c',CUSTOMER,NOPARAMETER,0,jobClearAutoDoor},  // JOB_AUTO_DOOR_OFF
-  {'D','A',CUSTOMER,NOPARAMETER,0,jobDoAutoDoor},     // JOB_AUTO_DOOR
-  {'K','r',CUSTOMER,NOPARAMETER,0,jobKlingel},        // JOB_KLINGEL
   {'C','K',CUSTOMER,BYTEARRAY,16,jobGetCardKey},          // JOB_GET_KEY
   {'C','I',CUSTOMER,BYTEARRAY,16,jobGetCardInfo},         // JOB_GET_INFO
   {'D','t',CUSTOMER,BYTEARRAY,16,jobTryInfo},             // JOB_TRY_INFO
   {'C','t',CUSTOMER,BYTEARRAY,4,jobTryCode},             // JOB_TRY_CODE
-  {'P','t',CUSTOMER,NOPARAMETER,0,jobPirTrigger},         //
-  {'L','N',CUSTOMER,NOPARAMETER,0,jobNextLichtStatus},
+*/
   {'C','f',CUSTOMER,NOPARAMETER,0,jobfoundCard},         // JOB_GET_INFO
   {'C','i',CUSTOMER,BYTEARRAY,INFO_LENGTH,jobGotCardInfo},         // JOB_GET_INFO
 };
 
 INFORMATION knetInformation[NUM_KZG_INFORMATION]=
 {
-  {"CQ",'C','1','l',FLOAT,1,(void*)&fHelligkeit,NULL}
+  {"ZB",'C','1','t',FLOAT,1,(void*)&fTemperaturZB,NULL}
 };
 
 ComReceiver knetCom(&kmulti,Node, knetCommands,NUM_KZG_COMMANDS, knetInformation,NUM_KZG_INFORMATION,NULL,NULL);
@@ -44,14 +48,19 @@ uint8_t i;
   uint8_t *info = (uint8_t*) pMem;
   bool valid = true;
 
-  for (i=0;i<INFO_LENGTH;i++)
+  if(keynum<INFO_NUM)
   {
-    if( info[i] != eeprom_read_byte(&InfoList[keynum][i]) )
+    for (i=0;i<INFO_LENGTH;i++)
     {
-      valid = false;
-      break;
+      if( info[i] != eeprom_read_byte(&InfoList[keynum][i]) )
+      {
+        valid = false;
+        break;
+      }
     }
   }
+  else
+    valid = false;
   open_door(valid);
   comRec->Getoutput()->sendCommand(Bedienung,'C',address,'r'); // release Card
 }
@@ -74,22 +83,10 @@ uint8_t tosend[KEY_LENGTH],i;
 }
 
 
-void jobNextLichtStatus(ComReceiver *comRec, char function,char address,char job, void * pMem)
-{
-  my_random_timer.Make_New();
-/*
-  if(iLichtKleinStatus<2)
-    iLichtKleinStatus++;
-  else
-    iLichtKleinStatus=0;
-  kmulti.broadcastUInt8(iLichtKleinStatus,'L','1','s');
-  cmulti.broadcastUInt8(iLichtKleinStatus,'L','1','s');*/
-}
-
 void jobPirTrigger(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
-  my_random_timer.Make_New();
-//  cmulti.broadcastUInt8(iLichtKleinStatus,function,address,job);
+  wakeup();
+
 }
 
 void jobGetRandom(ComReceiver *comRec, char function,char address,char job, void * pMem)
@@ -113,39 +110,8 @@ void jobNewRandom(ComReceiver *comRec, char function,char address,char job, void
   my_random_timer.Make_New();
 }
 
-void jobClearAutoDoor(ComReceiver *comRec, char function,char address,char job, void * pMem)
-{
-  auto_door_status = false;
-  broadcastOpenDoorStatus();
-  my_random_timer.Make_New();
-}
-
-void jobDoAutoDoor(ComReceiver *comRec, char function,char address,char job, void * pMem)
-{
-  my_random_timer.Make_New();
-  if (auto_door_status==true)
-  {
-    open_door(true);
-  }
-  else
-  {
-    if (MyTimers[TIMER_STOP_DOOR].state == TM_RUN)
-    {
-      //send_answer(&serKNET,"enabled",true);
-      auto_door_status = true;
-    }
-    else
-    {
-      //send_answer(&serKNET,"nope",false);
-      auto_door_status = false;
-    }
-    broadcastOpenDoorStatus();
-  }
-}
-
-
-
-/* Sendet den Key der Karte mit der Nummer keynum. Die ersten Stellen enthalten den Key, der Rest ActualRandom */
+/*
+// Sendet den Key der Karte mit der Nummer keynum. Die ersten Stellen enthalten den Key, der Rest ActualRandom
 void jobGetCardKey(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
 uint8_t tosend[KEY_LENGTH];
@@ -164,7 +130,7 @@ uint8_t i,keynum;
   }
 }
 
-/* Sendet den Info der Karte mit der Nummer keynum. Die ersten Stellen enthalten den Info, der Rest ActualRandom */
+// Sendet den Info der Karte mit der Nummer keynum. Die ersten Stellen enthalten den Info, der Rest ActualRandom
 void jobGetCardInfo(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
 	uint8_t tosend[INFO_LENGTH];
@@ -222,52 +188,4 @@ uint8_t i,j,right;
   }while( (j<INFO_NUM) && (right==false) );
   open_door(right);
 }
-
-
-
-/* Prüft auf richtigen Key: Information: 1./2. Byte Kartennummer dezimal, 3. .. Info, Rest ActualRandom */
-uint8_t check_info(uint8_t *data)
-{
-uint8_t cardnum,i;
-uint8_t info_ok = false;
-	cardnum = data[0];
-	if (cardnum<INFO_NUM)
-	{
-		i=0;
-		do
-		{
-			if (data[i+1] == eeprom_read_byte(&InfoList[cardnum][i]))
-				info_ok = true;
-			else
-				info_ok = false;
-			i++;
-		} while ( info_ok && (i<INFO_LENGTH) );
-		return(info_ok);
-	}
-	else
-		return(false);
-}
-
-uint8_t recode_data(char _node, char _function, char _job, char *original)
-{
-CRC_Calc cc;
-uint8_t i;
-	cc.Data('\\');
-	cc.Data('>');
-	cc.Data(_node);
-	cc.Data(_function);
-	cc.Data(_job);
-	if (cc.Test_CRC(original,original+32,32))
-	{
-		for (i=0;i<16;i++)
-		{
-			original[i] = ((original[2*i]-65)<<4 ) | ((original[2*i+1]-65) & 0x0f );
-		}
-		encrypt.Decrypt_Data((uint8_t*)original);
-		encrypt.Get_Data((uint8_t*)original);
-		return(true);
-	}
-	else
-		return(false);
-}
-
+*/
