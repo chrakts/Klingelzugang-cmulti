@@ -16,8 +16,6 @@
 #include "CNET_Functions.h"
 #include "KZG_Functions.h"
 #include "RandomTimer.h"
-#include "encrypt.hpp"
-
 
 enum{ REPORT_FIRST,REPORT_LICHTKLEINACTUAL,REPORT_LICHTKLEINSET,REPORT_LICHTGROSSACTUAL,REPORT_LICHTGROSSSET,
       REPORT_LICHTGRENZWERT,REPORT_LICHTHYSTERESE,REPORT_TEMPERATURZB,
@@ -33,8 +31,6 @@ extern volatile float fTemperaturZB;
 
 extern RandomTimer my_random_timer;
 
-extern uint8_t key[16];
-extern Encrypt encrypt;
 extern uint8_t Actual_Random[2][16];
 
 extern volatile uint8_t do_sleep;

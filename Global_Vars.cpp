@@ -15,10 +15,7 @@ volatile float fTemperaturZB=15.7;
 
 RandomTimer my_random_timer(&TCC1);
 
-Encrypt encrypt((uint8_t*)key);
-
 volatile uint8_t do_sleep = 0;
-
 
 volatile bool doNextReport=false;
 volatile uint8_t toReport=REPORT_FIRST;
