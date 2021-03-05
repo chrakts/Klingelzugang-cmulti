@@ -5,7 +5,7 @@ char signalStatusOld[13] ={0};
 
 #define NUM_AUTO_GAIN 16
 
-uint16_t AutoGain[NUM_AUTO_GAIN]= {0,3,6,12,20,50,120,240,480,960,1920,4000,8000,16000,32000,40960};
+uint16_t AutoGain[NUM_AUTO_GAIN]= {0,0,0,12,20,50,120,240,480,960,1920,4000,8000,16000,32000,40960};
 uint16_t KlingelGain[6]= {0,0,200,800,10080,40960};
 
 char getLedAutobright()
@@ -24,7 +24,7 @@ uint8_t	i=5;
 	return((char)i+65);
 }
 
-void sendSignalLamps()
+void sendSignalLamps(bool forceTransmit)
 {
   switch(inputStatus)
   {
@@ -146,7 +146,7 @@ void sendSignalLamps()
   signalStatus[10] = getLedAutobright();
   signalStatus[11] = getKlingelAutobright();
   signalStatus[12] = 0;
-  if(strcmp(signalStatusOld,signalStatus)!=0)
+  if( (strcmp(signalStatusOld,signalStatus)!=0) || (forceTransmit==true) )
   {
     kmulti.broadcastString(signalStatus,'S','1','s');
     strcpy(signalStatusOld,signalStatus);

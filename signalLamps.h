@@ -7,7 +7,7 @@ enum{C_SCHWARZ=65,C_BLAU,C_WEISS,C_ROT,C_GRUEN,C_LILA,C_GELB,C_ORANGE,C_TUERKIS,
 
 char getLedAutobright();
 char getKlingelAutobright();
-void sendSignalLamps();
+void sendSignalLamps(bool forceTransmit);
 void fillColor(uint8_t start,uint8_t ende,uint8_t color);
 
 #endif // SIGNALLAMPS_H_INCLUDED
