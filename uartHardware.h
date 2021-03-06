@@ -36,7 +36,7 @@
 #define RX_PIN_0    2
 #endif // PLUG_BUILT
 
-#define USART_RXCINTLVL_0 USART_RXCINTLVL_LO_gc
+#define USART_RXCINTLVL_0 USART_RXCINTLVL_HI_gc
 #define USART_TXCINTLVL_0 USART_TXCINTLVL_LO_gc
 /* ###################### ########### ############################ */
 
@@ -97,7 +97,7 @@
 #define TX_PIN_1    3
 #define RX_PIN_1    2
 
-#define USART_RXCINTLVL_1 USART_RXCINTLVL_LO_gc
+#define USART_RXCINTLVL_1 USART_RXCINTLVL_HI_gc
 #define USART_TXCINTLVL_1 USART_TXCINTLVL_LO_gc
 /* ###################### ########### ############################ */
 
