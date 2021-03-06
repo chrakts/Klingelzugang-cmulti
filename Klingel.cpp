@@ -42,7 +42,6 @@ void ring_bel(char klingel)
 	cmulti.broadcast('K',klingel,'r');
 }
 
-//SIGNAL(PORTD_INT0_vect)
 SIGNAL(TASTER_INT_VEC)
 {
 	_delay_ms(100);

@@ -3,7 +3,7 @@
 
 #include "Klingelzugang.h"
 
-enum{C_SCHWARZ=65,C_BLAU,C_WEISS,C_ROT,C_GRUEN,C_LILA,C_GELB,C_ORANGE,C_TUERKIS,C_BRAUN};
+enum{C_SCHWARZ=65,C_BLAU,C_WEISS,C_ROT,C_GRUEN,C_LILA,C_ORANGE,C_MAGENTA,C_TUERKIS,C_MINT,C_GELB};
 
 char getLedAutobright();
 char getKlingelAutobright();

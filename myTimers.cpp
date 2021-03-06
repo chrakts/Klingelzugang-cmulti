@@ -8,7 +8,7 @@
 #include "Klingelzugang.h"
 
 volatile TIMER MyTimers[MYTIMER_NUM]=	{	{TM_STOP,RESTART_NO,100,0,Beeper_Ready},
-											{TM_START,RESTART_YES,100,0,nextReport},
+											{TM_START,RESTART_YES,500,0,nextReport},
 											{TM_STOP,RESTART_NO,125,0,LED_toggle},
 											{TM_START,RESTART_NO,1200,0,goto_sleep},
 											{TM_STOP,RESTART_NO,250,0,Stop_Open_Door},

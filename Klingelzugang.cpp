@@ -124,8 +124,8 @@ void doReport()
         toReport = REPORT_FIRST;
       break;
     }
+    doNextReport = false;
   }
-  doNextReport = false;
 }
 
 void wakeup()
