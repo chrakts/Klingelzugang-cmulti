@@ -38,6 +38,7 @@ ComReceiver cnetCom(&cmulti,Node, cnetCommands,NUM_CNET_COMMANDS, cnetInformatio
 void mailPressed(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
   wakeup();
+  cmulti.broadcast(function,address,'P');
 }
 
 void gotNewBrightness()
