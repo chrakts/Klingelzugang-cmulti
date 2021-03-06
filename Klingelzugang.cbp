@@ -16,10 +16,13 @@
 					<Add option="-fomit-frame-pointer" />
 					<Add option="-O" />
 					<Add option="-Wall" />
-					<Add option="-std=c++11" />
+					<Add option="-std=c++14" />
 					<Add option="-mmcu=atxmega32a4u" />
 					<Add option="-DMAIN_BUILT" />
 					<Add option="-DMCU=atxmega32a4u" />
+					<Add option="-DSYSCLK=CLK32M" />
+					<Add option="-DPLL=0" />
+					<Add option="-DCLOCK_CALIBRATION=0x83" />
 					<Add directory="/home/chrak/Downloads/avr8-gnu-toolchain-linux_x86_64/avr/lib/avrxmega2" />
 					<Add directory="/home/chrak/Downloads/avr8-gnu-toolchain-linux_x86_64/avr/include" />
 				</Compiler>
@@ -40,10 +43,13 @@
 					<Add option="-fomit-frame-pointer" />
 					<Add option="-O" />
 					<Add option="-Wall" />
-					<Add option="-std=c++11" />
+					<Add option="-std=c++14" />
 					<Add option="-mmcu=atxmega128a4u" />
 					<Add option="-DPLUG_BUILT" />
 					<Add option="-DMCU=atxmega128a4u" />
+					<Add option="-DSYSCLK=CLK32M" />
+					<Add option="-DPLL=0" />
+					<Add option="-DCLOCK_CALIBRATION=0x83" />
 					<Add directory="/home/chrak/Downloads/avr8-gnu-toolchain-linux_x86_64/avr/lib/avrxmega2" />
 					<Add directory="/home/chrak/Downloads/avr8-gnu-toolchain-linux_x86_64/avr/include" />
 				</Compiler>
@@ -64,10 +70,13 @@
 					<Add option="-fomit-frame-pointer" />
 					<Add option="-O" />
 					<Add option="-Wall" />
-					<Add option="-std=c++11" />
+					<Add option="-std=c++14" />
 					<Add option="-mmcu=atxmega32a4u" />
 					<Add option="-DPLUG_BUILT" />
 					<Add option="-DMCU=atxmega32a4u" />
+					<Add option="-DSYSCLK=CLK32M" />
+					<Add option="-DPLL=0" />
+					<Add option="-DCLOCK_CALIBRATION=0x73" />
 					<Add directory="/home/chrak/Downloads/avr8-gnu-toolchain-linux_x86_64/avr/lib/avrxmega2" />
 					<Add directory="/home/chrak/Downloads/avr8-gnu-toolchain-linux_x86_64/avr/include" />
 				</Compiler>
@@ -150,14 +159,13 @@
 		<Unit filename="Licht.h" />
 		<Unit filename="RandomTimer.cpp" />
 		<Unit filename="RandomTimer.h" />
-		<Unit filename="UART.h" />
 		<Unit filename="asmdefs.h" />
 		<Unit filename="codeInput.cpp" />
 		<Unit filename="codeInput.h" />
 		<Unit filename="door.cpp" />
 		<Unit filename="door.h" />
-		<Unit filename="encrypt.cpp" />
-		<Unit filename="encrypt.hpp" />
+		<Unit filename="eepromData.cpp" />
+		<Unit filename="eepromData.h" />
 		<Unit filename="keys.cpp" />
 		<Unit filename="keys.h" />
 		<Unit filename="ledHardware.h" />
