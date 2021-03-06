@@ -1,7 +1,7 @@
 #include "codeInput.h"
 
 volatile uint8_t inputStatus=NO_INPUT;
-volatile char testCode[7];
+volatile char testCode[9];
 volatile uint8_t testCodePointer = 0;
 volatile uint8_t BlockingStatus = UNBLOCKED;
 uint16_t BlockadeZeiten[BLOCKED_LAST] = {50,200,400,600,1000,2000,6000};
@@ -11,12 +11,20 @@ void numberPressed(ComReceiver *comRec, char function,char address,char job, voi
 {
 uint8_t result;
   wakeup();
-  if(inputStatus != INPUT_BLOCKED)
+  if( (inputStatus < INPUT_BLOCKED1) | ((inputStatus > INPUT_BLOCKED)) )
   {
     auto_door_status = false;
-    inputStatus++;
-    testCode[testCodePointer] = address;
-    testCodePointer++;
+    if( (inputStatus==GOT_BAD_CODE) | (inputStatus==GOT_GOOD_CODE) )
+    {
+        inputStatus  = NO_INPUT;
+        testCodePointer = 0;
+    }
+    else
+    {
+      inputStatus++;
+      testCode[testCodePointer] = address;
+      testCodePointer++;
+    }
     switch(inputStatus)
     {
       case INPUT_READY:
@@ -32,7 +40,63 @@ uint8_t result;
         testCodePointer = 0;
         inputStatus  = NO_INPUT;
         result = checkSpecialCodeInput(testCode);
-        make_blocking(result);
+        switch(result)
+        {
+          case SC_NEW_CODE:
+            inputStatus = GET_NEW_CODE1;
+          break;
+          case SC_WRITE_NEW_CARD:
+            inputStatus = WRITE_NEW_CARD1;
+          break;
+          case SC_DELETE_CARD:
+          break;
+          case SC_REMOVE_CARD:
+          break;
+          default:
+            make_blocking(false);
+          break;
+        }
+      break;
+      case GET_NEW_READY:
+        testCode[testCodePointer]=0;
+        testCodePointer=0;
+        uint8_t check;
+        do
+        {
+          check = (testCode[testCodePointer]==testCode[testCodePointer+4]);
+          testCodePointer++;
+        }while( (testCodePointer<4) & (check==true) );
+        if(check==true)
+        {
+          for(uint8_t i=0;i<4;i++)
+            eeprom_update_byte((uint8_t*)&CodeList[0][i],testCode[i]);
+          inputStatus  = GOT_GOOD_CODE;
+        }
+        else
+          inputStatus  = GOT_BAD_CODE;
+        testCodePointer = 0;
+      break;
+      case WRITE_NEW_CARD_NUMBER_READY:
+        testCode[testCodePointer]=0;
+        uint8_t cardNumber = atoi(testCode);
+
+        if(cardNumber<KEY_NUM)
+        {
+          uint8_t toTransfer[KEY_LENGTH+INFO_LENGTH+1];
+          for(uint8_t i=0;i<KEY_LENGTH;i++)
+            toTransfer[i]  = eeprom_read_byte(&KeyList[cardNumber][i]);
+          for(uint8_t i=0;i<INFO_LENGTH;i++)
+            toTransfer[i+KEY_LENGTH]  = eeprom_read_byte(&InfoList[cardNumber][i]);
+          toTransfer[KEY_LENGTH+INFO_LENGTH]=0;
+          kmulti.sendByteArray(toTransfer,KEY_LENGTH+INFO_LENGTH,"ZB",'S','C','0'+cardNumber,'w');
+          inputStatus = WRITE_NEW_CARD_WAITING;
+        }
+        else
+        {
+          inputStatus  = NO_INPUT;
+
+        }
+        testCodePointer = 0;
       break;
     }
     sendSignalLamps(false);
@@ -42,12 +106,13 @@ uint8_t result;
 void specialPressed(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
   wakeup();
-  if(inputStatus != INPUT_BLOCKED)
+  if( (inputStatus < INPUT_BLOCKED1) | ((inputStatus > INPUT_BLOCKED)) )
   {
     auto_door_status = false;
     switch(address)
     {
       case 'H':
+
         inputStatus=NO_INPUT;
       break;
       case 'S':
@@ -124,6 +189,9 @@ uint8_t i,j;
       i++;
     }while( (i<6) && (right) );
     j++;
-  }while( (j<CODE_NUM) && (right==false) );
-  return( right );
+  }while( (j<SPECIAL_NUM) && (right==false) );
+  if(right==false)
+    return(SC_UNVALID_CODE);
+  else
+    return( j-1 );
 }

@@ -1,7 +1,7 @@
 #include "signalLamps.h"
 
-char signalStatus[13];
-char signalStatusOld[13] ={0};
+char signalStatus[14];
+char signalStatusOld[14] ={0};
 
 #define NUM_AUTO_GAIN 16
 
@@ -26,6 +26,7 @@ uint8_t	i=5;
 
 void sendSignalLamps(bool forceTransmit)
 {
+  signalStatus[12] = 'R';
   switch(inputStatus)
   {
     case INPUT_BLOCKED:
@@ -53,6 +54,7 @@ void sendSignalLamps(bool forceTransmit)
     break;
     case INPUT_SLEEP:
       fillColor(0,6,C_LILA);
+      signalStatus[12] = 'S';
     break;
     case NO_INPUT:
       fillColor(0,6,C_WEISS);
@@ -107,6 +109,57 @@ void sendSignalLamps(bool forceTransmit)
     case SPECIAL_READY:
       fillColor(0,6,C_GRUEN);
     break;
+    case GET_NEW_CODE1:
+      fillColor(1,5,C_BLAU);
+      signalStatus[0] = C_GELB;
+      signalStatus[5] = C_GELB;
+    break;
+    case GET_NEW_CODE2:
+      signalStatus[1] = C_GRUEN;
+    break;
+    case GET_NEW_CODE3:
+      signalStatus[2] = C_GRUEN;
+    break;
+    case GET_NEW_CODE4:
+      signalStatus[3] = C_GRUEN;
+    break;
+    case GET_NEW_CODE5:
+      fillColor(1,5,C_TUERKIS);
+    break;
+    case GET_NEW_CODE6:
+      signalStatus[1] = C_GRUEN;
+    break;
+    case GET_NEW_CODE7:
+      signalStatus[2] = C_GRUEN;
+    break;
+    case GET_NEW_CODE8:
+      signalStatus[3] = C_GRUEN;
+    break;
+    case GOT_GOOD_CODE:
+      fillColor(0,6,C_GRUEN);
+    break;
+    case GOT_BAD_CODE:
+      fillColor(0,6,C_ROT);
+    break;
+    case WRITE_NEW_CARD1:
+      fillColor(0,6,C_MINT);
+      signalStatus[2] = C_BLAU;
+      signalStatus[3] = C_BLAU;
+    break;
+    case WRITE_NEW_CARD2:
+      signalStatus[2] = C_GRUEN;
+    break;
+    case WRITE_NEW_CARD_NUMBER_READY:
+      signalStatus[3] = C_GRUEN;
+    break;
+    case WRITE_NEW_CARD_WAITING:
+      signalStatus[0] = C_LILA;
+      signalStatus[1] = C_TUERKIS;
+      signalStatus[2] = C_GRUEN;
+      signalStatus[3] = C_ORANGE;
+      signalStatus[4] = C_MAGENTA;
+      signalStatus[5] = C_ROT;
+    break;
   }
   switch(iLichtGrossSet)
   {
@@ -145,7 +198,9 @@ void sendSignalLamps(bool forceTransmit)
     signalStatus[9] = C_GELB;
   signalStatus[10] = getLedAutobright();
   signalStatus[11] = getKlingelAutobright();
-  signalStatus[12] = 0;
+
+  signalStatus[13] = 0;
+
   if( (strcmp(signalStatusOld,signalStatus)!=0) || (forceTransmit==true) )
   {
     kmulti.broadcastString(signalStatus,'S','1','s');
