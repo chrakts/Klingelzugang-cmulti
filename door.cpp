@@ -7,7 +7,6 @@ void open_door(uint8_t open)
 	if (open)
 	{
 	  inputStatus = DOOR_OPENING;
-		MyTimers[TIMER_ROT_TOGGLE].state = TM_STOP;
 		LEDGRUEN_ON;
 		OEFFNER_1;
 		OEFFNER_2;
@@ -15,10 +14,11 @@ void open_door(uint8_t open)
 		MyTimers[TIMER_STOP_DOOR].state = TM_START;
     sendSignalLamps(false);
     kmulti.broadcastString("Oeffne Tuer",'D','1','o');
+    MyTimers[TIMER_LED_BLINKEN].state = TM_STOP;
 	}
 	else
 	{
-		MyTimers[TIMER_ROT_TOGGLE].state = TM_START;
+		MyTimers[TIMER_LED_BLINKEN].state = TM_START;
 	}
 }
 
