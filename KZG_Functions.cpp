@@ -21,16 +21,10 @@ COMMAND knetCommands[NUM_KZG_COMMANDS] =
   {'D','p',CUSTOMER,NOPARAMETER,0,doorToggle},
   {'K','r',CUSTOMER,NOPARAMETER,0,jobKlingel},
   {'P','t',CUSTOMER,NOPARAMETER,0,jobPirTrigger},
-/*
-  {'R','g',CUSTOMER,NOPARAMETER,0,jobGetRandom},      // JOB_GET_RANDOM
-  {'R','n',CUSTOMER,NOPARAMETER,0,jobNewRandom},      // JOB_NEW_RANDOM
-  {'C','K',CUSTOMER,BYTEARRAY,16,jobGetCardKey},          // JOB_GET_KEY
-  {'C','I',CUSTOMER,BYTEARRAY,16,jobGetCardInfo},         // JOB_GET_INFO
-  {'D','t',CUSTOMER,BYTEARRAY,16,jobTryInfo},             // JOB_TRY_INFO
-  {'C','t',CUSTOMER,BYTEARRAY,4,jobTryCode},             // JOB_TRY_CODE
-*/
   {'C','f',CUSTOMER,NOPARAMETER,0,jobfoundCard},         // JOB_GET_INFO
+  {'C','c',CUSTOMER,NOPARAMETER,0,jobWriteReady},         // JOB_GET_INFO
   {'C','i',CUSTOMER,BYTEARRAY,INFO_LENGTH,jobGotCardInfo},         // JOB_GET_INFO
+  {'C','s',CUSTOMER,NOPARAMETER,0,jobGetKeyForClear},         // JOB_GET_INFO
 };
 
 INFORMATION knetInformation[NUM_KZG_INFORMATION]=
@@ -41,13 +35,33 @@ INFORMATION knetInformation[NUM_KZG_INFORMATION]=
 ComReceiver knetCom(&kmulti,Node, knetCommands,NUM_KZG_COMMANDS, knetInformation,NUM_KZG_INFORMATION,NULL,NULL);
 
 
+void jobWriteReady(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+  inputStatus = NO_INPUT;
+}
+
+void jobGetKeyForClear(ComReceiver *comRec, char function,char address,char job, void * pMem)
+{
+uint8_t tosend[KEY_LENGTH],i;
+
+  inputStatus = DELETE_CARD_WAITING;
+  uint8_t keynum = (uint8_t) address - '0';
+	if (keynum<KEY_NUM)
+	{
+		for (i=0;i<KEY_LENGTH;i++)
+		{
+			tosend[i] = eeprom_read_byte(&KeyList[keynum][i]);
+		}
+    comRec->Getoutput()->sendStandardByteArray(tosend,KEY_LENGTH,Bedienung,'C',address,'d','T');
+  }
+}
+
 void jobGotCardInfo(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
 uint8_t i;
   uint8_t keynum = (uint8_t) address - '0';
   uint8_t *info = (uint8_t*) pMem;
   bool valid = true;
-
   if(keynum<INFO_NUM)
   {
     for (i=0;i<INFO_LENGTH;i++)
@@ -69,7 +83,6 @@ uint8_t i;
 void jobfoundCard(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
 uint8_t tosend[KEY_LENGTH],i;
-
   uint8_t keynum = (uint8_t) address - '0';
 	if (keynum<KEY_NUM)
 	{
@@ -86,7 +99,8 @@ uint8_t tosend[KEY_LENGTH],i;
 void jobPirTrigger(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
   wakeup();
-
+  calcAndSendLichtActualStatus();
+  sendSignalLamps(false);
 }
 
 void jobGetRandom(ComReceiver *comRec, char function,char address,char job, void * pMem)
@@ -109,83 +123,3 @@ void jobNewRandom(ComReceiver *comRec, char function,char address,char job, void
 {
   my_random_timer.Make_New();
 }
-
-/*
-// Sendet den Key der Karte mit der Nummer keynum. Die ersten Stellen enthalten den Key, der Rest ActualRandom
-void jobGetCardKey(ComReceiver *comRec, char function,char address,char job, void * pMem)
-{
-uint8_t tosend[KEY_LENGTH];
-uint8_t i,keynum;
-
-  uint8_t adr = (uint8_t) address - 48;
-  keynum = ( (uint8_t*)pMem )[0];
-	if (keynum<KEY_NUM)
-	{
-		for (i=0;i<KEY_LENGTH;i++)
-		{
-			tosend[i] = eeprom_read_byte(&KeyList[keynum][i]);
-		}
-    comRec->Getoutput()->setEncryption(Actual_Random[adr]);
-    comRec->Getoutput()->sendStandardByteArray(tosend,KEY_LENGTH,Bedienung,'C',address,'k','T');
-  }
-}
-
-// Sendet den Info der Karte mit der Nummer keynum. Die ersten Stellen enthalten den Info, der Rest ActualRandom
-void jobGetCardInfo(ComReceiver *comRec, char function,char address,char job, void * pMem)
-{
-	uint8_t tosend[INFO_LENGTH];
-	uint8_t i,infonum;
-
-  uint8_t adr = (uint8_t) address - 48;
-  infonum = ( (uint8_t*)pMem )[0];
-  if (infonum<INFO_NUM)
-	{
-		for (i=0;i<INFO_LENGTH;i++)
-		{
-			tosend[i] =  eeprom_read_byte(&InfoList[infonum][i]);
-		}
-    comRec->Getoutput()->setEncryption(Actual_Random[adr]);
-    comRec->Getoutput()->sendStandardByteArray(tosend,INFO_LENGTH,Bedienung,'C',address,'i','T');
-	}
-}
-
-void jobTryInfo(ComReceiver *comRec, char function,char address,char job, void * pMem)
-{
-uint8_t i;
-
-  my_random_timer.Make_New();
-  auto_door_status = false;
-  uint8_t adr = (uint8_t) address - 48;
-  for(i=0;i<16;i++)
-    ((uint8_t*)pMem)[i] = ((uint8_t*)pMem)[i] ^ Actual_Random[adr][i];
-  open_door(check_info((uint8_t*)pMem) );
-}
-
-void jobTryCode(ComReceiver *comRec, char function,char address,char job, void * pMem)
-{
-uint8_t i,j,right;
-
-  my_random_timer.Make_New();
-  auto_door_status = false;
-  uint8_t adr = (uint8_t) address - 48;
-  for(i=0;i<16;i++)
-    ((uint8_t*)pMem)[i] = ((uint8_t*)pMem)[i] ^ Actual_Random[adr][i];
-
-  right = true;
-  j=0;
-  do
-  {
-    i=0;
-    do
-    {
-      if (  (( (uint8_t*)pMem)[i] )!=eeprom_read_byte((uint8_t*)&CodeList[j][i])  )
-        right = false;
-      else
-        right = true;
-      i++;
-    }while( (i<4) && (right) );
-    j++;
-  }while( (j<INFO_NUM) && (right==false) );
-  open_door(right);
-}
-*/

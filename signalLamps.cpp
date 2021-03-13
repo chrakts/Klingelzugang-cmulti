@@ -13,6 +13,10 @@ char getLedAutobright()
 uint8_t i=NUM_AUTO_GAIN-1;
 	while( (fHelligkeit<AutoGain[i]) & (i!=0) )
 		i--;
+  if( inputStatus == INPUT_SLEEP )
+    i-=2;
+  if(i<2)
+    i=2;
 	return((char)i+65+1); // plus 1 damit 100% 16/16 sind
 }
 
@@ -160,42 +164,68 @@ void sendSignalLamps(bool forceTransmit)
       signalStatus[4] = C_MAGENTA;
       signalStatus[5] = C_ROT;
     break;
+    case LOCK_CARD_NUMBER_1:
+      fillColor(0,6,C_MAGENTA);
+      signalStatus[2] = C_ORANGE;
+      signalStatus[3] = C_ORANGE;
+    break;
+    case LOCK_CARD_NUMBER_2:
+      signalStatus[2] = C_GRUEN;
+    break;
+    case LOCK_CARD_NUMBER_READY:
+      signalStatus[3] = C_GRUEN;
+    break;
+    case LOCK_CARD_NUMBER_WAITING:
+      fillColor(0,6,C_MAGENTA);
+      signalStatus[2] = C_ORANGE;
+    break;
+    case DELETE_CARD_READY:
+      fillColor(0,6,C_ORANGE);
+      signalStatus[1] = C_ROT;
+      signalStatus[4] = C_ROT;
+    break;
+    case DELETE_CARD_WAITING:
+      fillColor(0,6,C_ROT);
+      signalStatus[1] = C_ORANGE;
+      signalStatus[4] = C_ORANGE;
+    break;
   }
   switch(iLichtGrossSet)
   {
     case LICHT_SET_AUS:
-      signalStatus[6]  = C_ROT;
+      signalStatus[9]  = C_ROT;
     break;
     case LICHT_SET_EIN:
-      signalStatus[6]= C_ORANGE;
+      signalStatus[9]= C_ORANGE;
     break;
     case LICHT_SET_AUTO:
-      signalStatus[6]= C_BLAU;
+      signalStatus[9]= C_BLAU;
     break;
     case LICHT_SET_PIR:
-      signalStatus[6]= C_TUERKIS;
+      signalStatus[9]= C_TUERKIS;
     break;
   }
+  signalStatus[9]  = C_SCHWARZ;
   switch(iLichtKleinSet)
   {
     case LICHT_SET_AUS:
-      signalStatus[7]  = C_ROT;
+      signalStatus[8]  = C_ROT;
     break;
     case LICHT_SET_EIN:
-      signalStatus[7]= C_ORANGE;
+      signalStatus[8]= C_ORANGE;
     break;
     case LICHT_SET_AUTO:
-      signalStatus[7]= C_BLAU;
+      signalStatus[8]= C_TUERKIS;
     break;
     case LICHT_SET_PIR:
-      signalStatus[7]= C_TUERKIS;
+      signalStatus[8]= C_LILA;
     break;
   }
-  signalStatus[8] = C_SCHWARZ;
+  signalStatus[7] = C_SCHWARZ;
   if(auto_door_status==true)
-    signalStatus[9] = C_GRUEN;
+    signalStatus[6] = C_GRUEN;
   else
-    signalStatus[9] = C_GELB;
+    signalStatus[6] = C_GELB;
   signalStatus[10] = getLedAutobright();
   signalStatus[11] = getKlingelAutobright();
 

@@ -9,7 +9,7 @@ uint16_t BlockadeZeiten[BLOCKED_LAST] = {50,200,400,600,1000,2000,6000};
 
 void numberPressed(ComReceiver *comRec, char function,char address,char job, void * pMem)
 {
-uint8_t result;
+uint8_t result, cardNumber;
   wakeup();
   if( (inputStatus < INPUT_BLOCKED1) | ((inputStatus > INPUT_BLOCKED)) )
   {
@@ -48,9 +48,12 @@ uint8_t result;
           case SC_WRITE_NEW_CARD:
             inputStatus = WRITE_NEW_CARD1;
           break;
-          case SC_DELETE_CARD:
+          case SC_LOCK_CARD:
+            inputStatus = LOCK_CARD_NUMBER_1;
           break;
-          case SC_REMOVE_CARD:
+          case SC_DELETE_CARD:
+            inputStatus = DELETE_CARD_READY;
+            kmulti.sendCommand("ZB",'C','1','p');
           break;
           default:
             make_blocking(false);
@@ -78,7 +81,7 @@ uint8_t result;
       break;
       case WRITE_NEW_CARD_NUMBER_READY:
         testCode[testCodePointer]=0;
-        uint8_t cardNumber = atoi(testCode);
+        cardNumber = atoi((const char*)testCode);
 
         if(cardNumber<KEY_NUM)
         {
@@ -90,6 +93,25 @@ uint8_t result;
           toTransfer[KEY_LENGTH+INFO_LENGTH]=0;
           kmulti.sendByteArray(toTransfer,KEY_LENGTH+INFO_LENGTH,"ZB",'S','C','0'+cardNumber,'w');
           inputStatus = WRITE_NEW_CARD_WAITING;
+        }
+        else
+        {
+          inputStatus  = NO_INPUT;
+
+        }
+        testCodePointer = 0;
+      break;
+      case LOCK_CARD_NUMBER_READY:
+        testCode[testCodePointer]=0;
+        cardNumber = atoi((const char*)testCode);
+
+        if(cardNumber<KEY_NUM)
+        {
+          for(uint8_t i=0;i<KEY_LENGTH;i++)
+            eeprom_update_byte(&KeyList[cardNumber][i],0xff);
+          for(uint8_t i=0;i<INFO_LENGTH;i++)
+            eeprom_update_byte(&InfoList[cardNumber][i],0xff);
+          inputStatus  = LOCK_CARD_NUMBER_WAITING;
         }
         else
         {
