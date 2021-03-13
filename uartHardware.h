@@ -92,8 +92,15 @@
 
 #define UART_PORT_1 C
 #define UART_NUM_1  0
-#define TE_PIN_1    5
-#define RE_PIN_1    4
+
+#ifdef MAIN_BUILT
+  #define TE_PIN_1    0
+  #define RE_PIN_1    1
+#else
+  #define TE_PIN_1    5
+  #define RE_PIN_1    4
+#endif // MAIN_BUILT
+
 #define TX_PIN_1    3
 #define RX_PIN_1    2
 
@@ -147,7 +154,7 @@
 #define Busy_Control_TimVec_1  JOIN4(TC,BUSY_TIMER_PORT,2,_HUNF_vect)
 
 
-#define UART0_RING_BUFFER_SIZE 50
-#define UART1_RING_BUFFER_SIZE 50
+#define UART0_RING_BUFFER_SIZE 100
+#define UART1_RING_BUFFER_SIZE 100
 
 #endif // UARTHARDWARE_H_INCLUDED
