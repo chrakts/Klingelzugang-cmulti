@@ -73,11 +73,11 @@ typedef struct Timer TIMER;
 #define OEFFNER_PIN_L	PIN0_bm
 #define OEFFNER_PIN_H	PIN1_bm
 
-#define TASTER_PORT     PORTD
+//#define TASTER_PORT     PORTD
 #define TASTER_LED			PIN1_bm
 #define TASTER_PORT_C    D
 #define TASTER_INPUT_C   2
-#define TASTER_INT_NUM_C 0
+#define TASTER_INT_NUM_C 1
 
 // ------------- PORT A -------------------
 
@@ -104,11 +104,15 @@ typedef struct Timer TIMER;
 #define STREET_OUT_RING		PIN7_bm
 
 // ------------- PORT D -------------------
-#define DAC_PIN10_PIN		PIN0_bm
-#define HOUSE_OUT0			PIN3_bm
-#define HOUSE_OUT_RING		PIN4_bm
 
-#define RS485_1_TERE_PIN	PIN5_bm
+// ------------- PORT D -------------------
+#define DAC_PIN10_PIN		PIN0_bm
+#define TASTER_SINK			PIN1_bm
+#define TASTER_PFORTE		PIN2_bm
+#define HOUSE_OUT0			PIN3_bm
+
+#define RS485_1_TE_PIN		PIN4_bm
+#define RS485_1_RE_PIN	  PIN5_bm
 #define RS485_1_RxD_PIN		PIN6_bm
 #define RS485_1_TxD_PIN		PIN7_bm
 
@@ -139,7 +143,7 @@ typedef struct Timer TIMER;
 
 #define KLINGEL0_START				KLINGEL_PORT.OUTSET=KLINGEL0_PIN
 #define KLINGEL1_START				KLINGEL_PORT.OUTSET=KLINGEL1_PIN
-#define KLINGEL_STOP				  KLINGEL_PORT.OUTCLR = KLINGEL0_PIN && KLINGEL1_PIN
+#define KLINGEL_STOP				  KLINGEL_PORT.OUTCLR = KLINGEL0_PIN | KLINGEL1_PIN
 
 #define OEFFNER_1					OEFFNER_PORT.OUTCLR = OEFFNER_PIN_L
 #define OEFFNER_2					OEFFNER_PORT.OUTSET = OEFFNER_PIN_H

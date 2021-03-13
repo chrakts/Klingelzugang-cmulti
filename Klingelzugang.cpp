@@ -17,8 +17,8 @@ void init_io()
 	PORTB_DIRSET = 0xff;
 	PORTC_DIRSET = RS485_0_TE_PIN | RS485_0_RE_PIN | RS485_0_TxD_PIN | STREET_WANT_MASTER;
 	PORTC_DIRCLR = RS485_0_RxD_PIN | STREET_LET_MASTER | STREET_OUT0 | STREET_OUT_RING;
-	PORTD_DIRSET =  DAC_PIN10_PIN | RS485_1_TERE_PIN | RS485_1_TxD_PIN | TASTER_SINK;
-	PORTD_DIRCLR =  TASTER_PFORTE | HOUSE_OUT0 | HOUSE_OUT_RING | RS485_1_RxD_PIN;
+	PORTD_DIRSET =  DAC_PIN10_PIN | RS485_1_RE_PIN | RS485_1_TE_PIN | RS485_1_TxD_PIN | TASTER_SINK;
+	PORTD_DIRCLR =  TASTER_PFORTE | HOUSE_OUT0 | RS485_1_RxD_PIN;
 	PORTE_DIRSET = 0xff;
 	PORTE_OUTCLR = KLINGEL0_PIN | KLINGEL1_PIN;
 //	PORTE_DIRCLR = ;
@@ -65,13 +65,13 @@ int main(void)
 	init_mytimer();
 	init_klingel();
 
-	WDT_EnableAndSetTimeout(WDT_SHORT);
 
 	WDT_Reset();
   kmulti.sendInfo("Hallo an Bedienung","PP");
   cmulti.broadcastUInt8((uint8_t) RST.STATUS,'S','0','R');
   cmulti.broadcastString("Hallo an CNET",'H','h','h');
   MyTimers[TIMER_NEXT_REPORT].state = TM_START;
+	WDT_EnableAndSetTimeout(WDT_SHORT);
 	do
 	{
     knetCom.comStateMachine();
@@ -124,8 +124,8 @@ void doReport()
         toReport = REPORT_FIRST;
       break;
     }
+    doNextReport = false;
   }
-  doNextReport = false;
 }
 
 void wakeup()
