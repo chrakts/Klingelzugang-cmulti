@@ -100,9 +100,9 @@ uint8_t calcHysterese(uint8_t oldValue)
 uint8_t calcPIR()
 {
   if( (inputStatus!=INPUT_SLEEP) && (fHelligkeit<(float)iLichtgrenzwert) )
-    return(LICHT_SET_AUS);
-  else
     return(LICHT_SET_EIN);
+  else
+    return(LICHT_SET_AUS);
 }
 
 void lightToggle(ComReceiver *comRec, char function,char address,char job, void * pMem)
@@ -117,10 +117,13 @@ void lightToggle(ComReceiver *comRec, char function,char address,char job, void 
       updateLicht(iLichtKleinSet,address);
     break;
     case '2':
+      iLichtGrossSet = LICHT_SET_AUS;
+      /*
       iLichtGrossSet += 1;
       if(iLichtGrossSet==LICHT_SET_UNVALID)
         iLichtGrossSet=LICHT_SET_AUS;
-      updateLicht(iLichtGrossSet,address);
+      updateLicht(iLichtGrossSet,address);*/
+      kmulti.sendCommand("ZB",'L','2','t');
     break;
   }
 }
