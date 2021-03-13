@@ -34,20 +34,12 @@ void ring_bel(char klingel)
 	else
   {
 		KLINGEL1_START;
-		LEDGELB_ON;
+		LEDGRUEN_ON;
   }
-  //my_random_timer.Make_New();
+  my_random_timer.Make_New();
 	MyTimers[TIMER_STOP_RING_BEL].value = 700;
 	MyTimers[TIMER_STOP_RING_BEL].state = TM_START;
 	cmulti.broadcast('K',klingel,'r');
-}
-
-void entprelltTaster(uint8_t test)
-{
-  if( (TASTER_PORT.IN & TASTER_INPUT)==0 )
-	{
-		ring_bel('1');
-	}
 }
 
 SIGNAL(TASTER_INT_VEC)
