@@ -12,8 +12,8 @@ void init_klingel()
 	TASTERLEDSETUP;
 	TASTERINPUTSETUP;
 	TASTERLED_ON;
-	TASTER_PORT.INTCTRL  |= PORT_INT0LVL0_bm ; // Low-Level interrupt 0 for PORTA
-	TASTER_PORT.INT0MASK |= TASTER_INPUT;
+	TASTER_PORT.INTCTRL  |= PORT_INT1LVL0_bm ; // Low-Level interrupt 0 for PORTA
+	TASTER_PORT.INT1MASK |= TASTER_INPUT;
 	TASTER_PORT.TASTER_INTPIN = PORT_ISC_FALLING_gc | PORT_OPC_PULLUP_gc | PORT_SRLEN_bm;
 }
 
@@ -34,20 +34,23 @@ void ring_bel(char klingel)
 	else
   {
 		KLINGEL1_START;
-		LEDGRUEN_ON;
+		LEDGELB_ON;
   }
-  my_random_timer.Make_New();
+  //my_random_timer.Make_New();
 	MyTimers[TIMER_STOP_RING_BEL].value = 700;
 	MyTimers[TIMER_STOP_RING_BEL].state = TM_START;
 	cmulti.broadcast('K',klingel,'r');
 }
 
-//SIGNAL(PORTD_INT0_vect)
-SIGNAL(TASTER_INT_VEC)
+void entprelltTaster(uint8_t test)
 {
-	_delay_ms(100);
-	if( (TASTER_PORT.IN & TASTER_INPUT)==0 )
+  if( (TASTER_PORT.IN & TASTER_INPUT)==0 )
 	{
 		ring_bel('1');
 	}
+}
+
+SIGNAL(TASTER_INT_VEC)
+{
+	MyTimers[TIMER_ENTPRELLT_TASTER].state = TM_START;
 }

@@ -11,7 +11,7 @@
 
 void init_klingel(void);
 void jobKlingel(ComReceiver *comRec, char function,char address,char job, void * pMem);
-
+void entprelltTaster(uint8_t test);
 void ring_bel(char klingel);
 
 
